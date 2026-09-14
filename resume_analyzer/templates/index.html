@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Resume - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h2>Upload your resume</h2>
+  <p>Only PDF files are accepted. Maximum file size is 5 MB.</p>
+
+  <form action="{{ url_for('upload_resume') }}" method="post" enctype="multipart/form-data">
+    <label for="resume">Resume (PDF)</label>
+    <input type="file" id="resume" name="resume" accept="application/pdf" required />
+    <button type="submit">Upload Resume</button>
+  </form>
+</section>
+{% endblock %}

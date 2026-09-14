@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Successful - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<section class="card">
+  <h2>Resume uploaded successfully</h2>
+  <table class="info-table">
+    <tr><th>Original file name</th><td>{{ original_name }}</td></tr>
+    <tr><th>Stored file name</th><td>{{ stored_name }}</td></tr>
+    <tr><th>File size</th><td>{{ file_size_kb }} KB</td></tr>
+  </table>
+
+  <p class="note">
+    Text extraction, keyword/skill analysis and job matching will be added in the
+    next milestones.
+  </p>
+
+  <a class="button-link" href="{{ url_for('index') }}">Upload another resume</a>
+</section>
+{% endblock %}
