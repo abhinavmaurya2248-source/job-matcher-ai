@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+{% with heading = 'Dashboard', sub = 'Your analyses at a glance. Statistics stay empty until the analysis engine is built.' %}
+  {% include "partials/page_header.html" %}
+{% endwith %}
+
+<div class="container py-4">
+  <div class="row g-3">
+    <div class="col-sm-6 col-xl-3">
+      {% with label = 'Total Analyses', value = '--', hint = 'No analyses stored yet', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      {% with label = 'Average Match Score', value = '--', hint = 'Available after analysis is implemented', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      {% with label = 'Resumes Uploaded', value = '--', hint = 'Counter added with the database', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+    <div class="col-sm-6 col-xl-3">
+      {% with label = 'Latest Analysis', value = '--', hint = 'Nothing analysed yet', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Recent analyses</span>
+          <a class="btn btn-sm btn-outline-dark" href="{{ url_for('history') }}">View all</a>
+        </div>
+        <div class="card-body">
+          {% with title = 'No analyses yet',
+                  message = 'Upload a resume with a job description to create your first analysis.',
+                  action_url = url_for('analyze'),
+                  action_label = 'Upload Resume' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-4">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Quick actions</div>
+        <div class="card-body d-grid gap-2">
+          <a class="btn btn-accent" href="{{ url_for('analyze') }}">Upload Resume</a>
+          <a class="btn btn-outline-dark" href="{{ url_for('analyze') }}">Analyze Job Description</a>
+          <a class="btn btn-outline-dark" href="{{ url_for('history') }}">Analysis History</a>
+          <a class="btn btn-outline-dark" href="{{ url_for('profile') }}">Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,10 @@
+{# Reusable empty state.
+   Params: title, message, action_url (optional), action_label (optional) #}
+<div class="empty-state text-center">
+  <div class="empty-icon mb-3">&#9634;</div>
+  <h3 class="h6 mb-2">{{ title }}</h3>
+  <p class="small text-muted-soft mb-3">{{ message }}</p>
+  {% if action_url and action_label %}
+    <a class="btn btn-accent btn-sm" href="{{ action_url }}">{{ action_label }}</a>
+  {% endif %}
+</div>

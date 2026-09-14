@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+{% with heading = 'Admin Dashboard', sub = 'Layout only - all figures below are placeholders, not real system data.' %}
+  {% include "partials/page_header.html" %}
+{% endwith %}
+
+<div class="container py-4">
+  <div class="row g-3">
+    <div class="col-sm-6 col-xl-4">
+      {% with label = 'Total Users', value = '--', hint = 'Needs the user database', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      {% with label = 'Total Resumes', value = '--', hint = 'Needs resume records', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+    <div class="col-sm-6 col-xl-4">
+      {% with label = 'Total Analyses', value = '--', hint = 'Needs the analysis engine', placeholder = True %}
+        {% include "partials/stat_card.html" %}
+      {% endwith %}
+    </div>
+  </div>
+
+  <div class="row g-3 mt-1">
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Recent activity</div>
+        <div class="card-body">
+          {% with title = 'No activity recorded',
+                  message = 'Activity logging arrives with the admin backend milestone.' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">System statistics</div>
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-sm mb-0">
+              <tbody>
+                <tr><th>Application</th><td>AI Resume Analyzer</td></tr>
+                <tr><th>Backend</th><td>Python + Flask</td></tr>
+                <tr><th>Storage</th><td>Local uploads folder</td></tr>
+                <tr><th>Database</th><td class="text-muted-soft">Not configured yet</td></tr>
+                <tr><th>Analysis engine</th><td class="text-muted-soft">Not implemented yet</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
