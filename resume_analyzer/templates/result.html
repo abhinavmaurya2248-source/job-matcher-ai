@@ -1,21 +1,110 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Successful - AI Resume Analyzer{% endblock %}
+{% block title %}Analysis Result - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-<section class="card">
-  <h2>Resume uploaded successfully</h2>
-  <table class="info-table">
-    <tr><th>Original file name</th><td>{{ original_name }}</td></tr>
-    <tr><th>Stored file name</th><td>{{ stored_name }}</td></tr>
-    <tr><th>File size</th><td>{{ file_size_kb }} KB</td></tr>
-  </table>
+{% with heading = 'Analysis Result', sub = 'Layout is ready and will be filled by the Flask backend once analysis is implemented.' %}
+  {% include "partials/page_header.html" %}
+{% endwith %}
 
-  <p class="note">
-    Text extraction, keyword/skill analysis and job matching will be added in the
-    next milestones.
-  </p>
+<div class="container py-4">
+  {% if uploaded %}
+    <div class="alert alert-success">
+      <p class="fw-semibold mb-2">Resume uploaded successfully</p>
+      <div class="row small gy-1">
+        <div class="col-sm-6">File name: <strong>{{ uploaded.original_name }}</strong></div>
+        <div class="col-sm-6">Stored as: <strong>{{ uploaded.stored_name }}</strong></div>
+        <div class="col-sm-6">Size: <strong>{{ uploaded.file_size_kb }} KB</strong></div>
+        <div class="col-sm-6">
+          Job description length: <strong>{{ uploaded.job_description_chars }} characters</strong>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="alert alert-info">
+      No analysis has been run. Upload a resume from the
+      <a href="{{ url_for('analyze') }}">upload page</a> to see this layout with your file details.
+    </div>
+  {% endif %}
 
-  <a class="button-link" href="{{ url_for('index') }}">Upload another resume</a>
-</section>
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card text-center h-100">
+        <div class="card-body">
+          <p class="stat-label mb-2">Resume-Job Match Score</p>
+          <div class="score-circle mx-auto mb-2">--</div>
+          <span class="badge badge-placeholder">Awaiting analysis engine</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Score breakdown</div>
+        <div class="card-body">
+          {% for metric in ['Text Similarity', 'Skill Match'] %}
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>{{ metric }}</span><span class="text-muted-soft">--</span>
+              </div>
+              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+            </div>
+          {% endfor %}
+          <p class="small text-muted-soft mb-0">
+            These bars stay empty until the similarity and skill-matching modules exist.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Matched skills</div>
+        <div class="card-body">
+          {% with title = 'No matched skills yet', message = 'Skill extraction is implemented in a later milestone.' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Missing skills</div>
+        <div class="card-body">
+          {% with title = 'No missing skills yet', message = 'Job requirement comparison is not implemented yet.' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Resume strengths</div>
+        <div class="card-body">
+          {% with title = 'Nothing to show', message = 'Strengths are derived from the analysis output.' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header bg-transparent fw-semibold">Recommendations</div>
+        <div class="card-body">
+          {% with title = 'Nothing to show', message = 'Recommendations appear once scoring exists.' %}
+            {% include "partials/empty_state.html" %}
+          {% endwith %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4 d-flex flex-wrap gap-2">
+    <a class="btn btn-accent" href="{{ url_for('analyze') }}">Upload another resume</a>
+    <a class="btn btn-outline-dark" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+  </div>
+</div>
 {% endblock %}

@@ -1,16 +1,116 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Resume - AI Resume Analyzer{% endblock %}
+{% block title %}AI-Based Resume Analyzer and Job Matching System{% endblock %}
 
 {% block content %}
-<section class="card">
-  <h2>Upload your resume</h2>
-  <p>Only PDF files are accepted. Maximum file size is 5 MB.</p>
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-6">
+        <span class="badge badge-soft mb-3">BCA Minor Project</span>
+        <h1 class="display-6 fw-bold mb-3">
+          AI-Based Resume Analyzer and Job Matching System
+        </h1>
+        <p class="lead mb-4">
+          Upload your resume as a PDF, paste a job description, and see how well the
+          two match - based on real text similarity and skill comparison.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-accent btn-lg px-4" href="{{ url_for('analyze') }}">Upload Resume</a>
+          <a class="btn btn-outline-dark btn-lg px-4" href="{{ url_for('dashboard') }}">View Dashboard</a>
+        </div>
+        <p class="small text-muted-soft mt-3 mb-0">
+          Current build: resume upload and validation are working. Analysis features
+          are added in the next milestones.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <div class="card hero-card">
+          <div class="card-body">
+            <p class="stat-label mb-3">Sample result layout</p>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>Match Score</span><span class="text-muted-soft">awaiting analysis</span>
+              </div>
+              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+            </div>
+            <div class="mb-3">
+              <div class="d-flex justify-content-between small mb-1">
+                <span>Text Similarity</span><span class="text-muted-soft">awaiting analysis</span>
+              </div>
+              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+            </div>
+            <div>
+              <div class="d-flex justify-content-between small mb-1">
+                <span>Skill Match</span><span class="text-muted-soft">awaiting analysis</span>
+              </div>
+              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <form action="{{ url_for('upload_resume') }}" method="post" enctype="multipart/form-data">
-    <label for="resume">Resume (PDF)</label>
-    <input type="file" id="resume" name="resume" accept="application/pdf" required />
-    <button type="submit">Upload Resume</button>
-  </form>
+<section class="container py-5">
+  <h2 class="h4 mb-4">Key features</h2>
+  <div class="row g-3">
+    {% set features = [
+      ('PDF resume upload', 'Secure upload with type and size validation, and unique stored file names.'),
+      ('Text extraction', 'Resume text is read directly from the PDF for processing.'),
+      ('Keyword and skill detection', 'Skills found in the resume are compared with the job requirements.'),
+      ('Match score', 'A score based on text similarity and skill overlap, not hardcoded values.'),
+      ('Missing skills', 'See which required skills the resume does not mention yet.'),
+      ('Analysis history', 'Keep past analyses so you can compare different resumes and jobs.')
+    ] %}
+    {% for name, text in features %}
+      <div class="col-md-6 col-lg-4">
+        <div class="card feature-card h-100">
+          <div class="card-body">
+            <h3 class="h6">{{ name }}</h3>
+            <p class="small text-muted-soft mb-0">{{ text }}</p>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="section-alt py-5">
+  <div class="container">
+    <h2 class="h4 mb-4">How it works</h2>
+    <div class="row g-3 workflow">
+      {% set steps = [
+        ('1', 'Upload resume', 'Choose a PDF file up to 5 MB.'),
+        ('2', 'Add job description', 'Paste the job description you want to target.'),
+        ('3', 'Automatic analysis', 'Text is cleaned and compared using NLP techniques.'),
+        ('4', 'Get your result', 'Match score, matched skills and missing skills.')
+      ] %}
+      {% for num, name, text in steps %}
+        <div class="col-sm-6 col-lg-3">
+          <div class="card step-card h-100">
+            <div class="card-body">
+              <span class="step-number">{{ num }}</span>
+              <h3 class="h6 mt-3">{{ name }}</h3>
+              <p class="small text-muted-soft mb-0">{{ text }}</p>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="container py-5">
+  <div class="card cta-card">
+    <div class="card-body d-md-flex align-items-center justify-content-between gap-3">
+      <div>
+        <h2 class="h5 mb-1">Ready to check your resume?</h2>
+        <p class="small text-muted-soft mb-0">Start with a PDF upload - it takes a few seconds.</p>
+      </div>
+      <a class="btn btn-accent mt-3 mt-md-0" href="{{ url_for('analyze') }}">Start now</a>
+    </div>
+  </div>
 </section>
 {% endblock %}

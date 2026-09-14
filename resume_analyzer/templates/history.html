@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}Analysis History - AI Resume Analyzer{% endblock %}
+
+{% block content %}
+{% with heading = 'Analysis History', sub = 'Past analyses will be listed here once storage is added.' %}
+  {% include "partials/page_header.html" %}
+{% endwith %}
+
+<div class="container py-4">
+  <div class="card">
+    <div class="card-header bg-transparent">
+      <div class="row g-2 align-items-center">
+        <div class="col-md-6">
+          <input class="form-control form-control-sm" type="search" placeholder="Search by resume or job title" disabled />
+        </div>
+        <div class="col-md-3">
+          <select class="form-select form-select-sm" disabled>
+            <option>Sort by newest</option>
+          </select>
+        </div>
+        <div class="col-md-3 text-md-end">
+          <a class="btn btn-sm btn-accent" href="{{ url_for('analyze') }}">New analysis</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-body">
+      {% if analyses %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Resume</th><th>Job</th><th>Match Score</th><th>Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in analyses %}
+                <tr>
+                  <td>{{ row.resume }}</td>
+                  <td>{{ row.job }}</td>
+                  <td><span class="badge badge-soft">{{ row.score }}</span></td>
+                  <td class="small text-muted-soft">{{ row.date }}</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('result_placeholder') }}">View</a>
+                    <button class="btn btn-sm btn-outline-danger" type="button" disabled>Delete</button>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% with title = 'No history yet',
+                message = 'Analyses are saved after the database milestone. Search and delete are disabled until then.',
+                action_url = url_for('analyze'),
+                action_label = 'Upload Resume' %}
+          {% include "partials/empty_state.html" %}
+        {% endwith %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
