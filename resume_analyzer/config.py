@@ -22,3 +22,10 @@ class Config:
 
     # Maximum upload size: 5 MB.
     MAX_CONTENT_LENGTH = 5 * 1024 * 1024
+
+    # SQLite database file used for authentication (Milestone 3).
+    DATABASE = os.environ.get("DATABASE", os.path.join(BASE_DIR, "resume_analyzer.db"))
+
+    # Session cookie hardening.
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"

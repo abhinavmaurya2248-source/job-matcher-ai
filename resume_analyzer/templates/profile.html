@@ -3,7 +3,7 @@
 {% block title %}Profile - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Profile', sub = 'Interface only - profile data is saved after accounts exist.' %}
+{% with heading = 'Profile', sub = 'Your account details. Editing is added in a later milestone.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
@@ -12,10 +12,9 @@
     <div class="col-lg-4">
       <div class="card text-center h-100">
         <div class="card-body">
-          <div class="avatar mx-auto mb-3">?</div>
-          <h2 class="h6 mb-1">Not signed in</h2>
-          <p class="small text-muted-soft mb-3">No account information available</p>
-          <span class="badge badge-placeholder">Placeholder</span>
+          <div class="avatar mx-auto mb-3">{{ current_user['full_name'][0]|upper }}</div>
+          <h2 class="h6 mb-1">{{ current_user['full_name'] }}</h2>
+          <p class="small text-muted-soft mb-0">{{ current_user['email'] }}</p>
         </div>
       </div>
     </div>
@@ -27,9 +26,9 @@
           <div class="table-responsive">
             <table class="table table-sm mb-0">
               <tbody>
-                <tr><th class="w-50">Name</th><td class="text-muted-soft">--</td></tr>
-                <tr><th>Email</th><td class="text-muted-soft">--</td></tr>
-                <tr><th>Member since</th><td class="text-muted-soft">--</td></tr>
+                <tr><th class="w-50">Name</th><td>{{ current_user['full_name'] }}</td></tr>
+                <tr><th>Email</th><td>{{ current_user['email'] }}</td></tr>
+                <tr><th>Member since</th><td>{{ current_user['created_at'] }}</td></tr>
                 <tr><th>Total analyses</th><td class="text-muted-soft">--</td></tr>
               </tbody>
             </table>

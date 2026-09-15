@@ -9,19 +9,17 @@
       <div class="card auth-card">
         <div class="card-body p-4">
           <h1 class="h4 mb-1">Create account</h1>
-          <p class="small text-muted-soft">Interface only - accounts are stored in a later milestone.</p>
+          <p class="small text-muted-soft">Your password is stored only as a secure hash.</p>
 
-          <div class="alert alert-info small py-2">This form does not submit anywhere yet.</div>
-
-          <form class="needs-validation" novalidate onsubmit="return false;">
+          <form class="needs-validation" method="post" action="{{ url_for('register') }}" novalidate>
             <div class="mb-3">
               <label class="form-label" for="name">Full name</label>
-              <input class="form-control" type="text" id="name" name="name" required />
+              <input class="form-control" type="text" id="name" name="name" value="{{ form_name or '' }}" required />
               <div class="invalid-feedback">Please enter your name.</div>
             </div>
             <div class="mb-3">
               <label class="form-label" for="reg-email">Email</label>
-              <input class="form-control" type="email" id="reg-email" name="email" required />
+              <input class="form-control" type="email" id="reg-email" name="email" value="{{ form_email or '' }}" required />
               <div class="invalid-feedback">Please enter a valid email address.</div>
             </div>
             <div class="mb-3">
@@ -34,7 +32,7 @@
               <input class="form-control" type="password" id="confirm-password" name="confirm_password" required />
               <div class="invalid-feedback">Please repeat the password.</div>
             </div>
-            <button class="btn btn-accent w-100" type="submit" disabled>Register</button>
+            <button class="btn btn-accent w-100" type="submit">Register</button>
           </form>
 
           <p class="small mt-3 mb-0">
