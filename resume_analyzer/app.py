@@ -13,11 +13,16 @@ Then open http://127.0.0.1:5000
 """
 
 import os
+import sqlite3
 import uuid
 
-from flask import Flask, flash, redirect, render_template, request, url_for
+from flask import Flask, flash, redirect, render_template, request, session, url_for
+from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
+import auth
+import db
+from auth import current_user, login_required
 from config import Config
 
 
@@ -28,6 +33,14 @@ def create_app() -> Flask:
 
     # Make sure the uploads folder exists before any file is saved.
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+
+    # Create the SQLite database / users table if needed (Milestone 3).
+    db.init_app(app)
+
+    # Make the logged-in user available to every template.
+    @app.context_processor
+    def inject_current_user():
+        return {"current_user": current_user()}
 
     register_routes(app)
     return app
