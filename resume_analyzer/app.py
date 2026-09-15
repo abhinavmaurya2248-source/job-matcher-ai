@@ -196,6 +196,7 @@ def register_routes(app: Flask) -> None:
 
     # ---------------------------------------------- Milestone 1 upload logic
     @app.route("/upload", methods=["POST"])
+    @login_required
     def upload_resume():
         """Validate and save the uploaded resume file (Milestone 1 logic)."""
         if "resume" not in request.files:

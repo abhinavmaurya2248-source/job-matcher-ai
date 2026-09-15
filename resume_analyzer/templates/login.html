@@ -9,14 +9,20 @@
       <div class="card auth-card">
         <div class="card-body p-4">
           <h1 class="h4 mb-1">Login</h1>
-          <p class="small text-muted-soft">Interface only - sign-in is enabled in a later milestone.</p>
+          <p class="small text-muted-soft">Sign in with the email and password you registered with.</p>
 
-          <div class="alert alert-info small py-2">This form does not submit anywhere yet.</div>
-
-          <form class="needs-validation" novalidate onsubmit="return false;">
+          <form class="needs-validation" method="post" action="{{ url_for('login') }}" novalidate>
             <div class="mb-3">
               <label class="form-label" for="email">Email</label>
-              <input class="form-control" type="email" id="email" name="email" placeholder="you@example.com" required />
+              <input
+                class="form-control"
+                type="email"
+                id="email"
+                name="email"
+                value="{{ form_email or '' }}"
+                placeholder="you@example.com"
+                required
+              />
               <div class="invalid-feedback">Please enter a valid email address.</div>
             </div>
             <div class="mb-3">
@@ -24,11 +30,7 @@
               <input class="form-control" type="password" id="password" name="password" required />
               <div class="invalid-feedback">Please enter your password.</div>
             </div>
-            <div class="form-check mb-3">
-              <input class="form-check-input" type="checkbox" id="remember" />
-              <label class="form-check-label small" for="remember">Remember me</label>
-            </div>
-            <button class="btn btn-accent w-100" type="submit" disabled>Login</button>
+            <button class="btn btn-accent w-100" type="submit">Login</button>
           </form>
 
           <p class="small mt-3 mb-0">
