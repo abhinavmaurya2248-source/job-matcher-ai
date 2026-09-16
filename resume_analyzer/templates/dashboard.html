@@ -3,14 +3,14 @@
 {% block title %}Dashboard - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Dashboard', sub = 'Your analyses at a glance. Statistics stay empty until the analysis engine is built.' %}
+{% with heading = 'Dashboard', sub = 'Upload counts come from your own records. Scores stay empty until the analysis engine is built.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
 <div class="container py-4">
   <div class="row g-3">
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Total Analyses', value = '--', hint = 'No analyses stored yet', placeholder = True %}
+      {% with label = 'Total Analyses', value = analysis_count, hint = 'Stored analyses in your account' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
@@ -20,12 +20,15 @@
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Resumes Uploaded', value = '--', hint = 'Counter added with the database', placeholder = True %}
+      {% with label = 'Resumes Uploaded', value = resume_count, hint = 'Saved in the database' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Latest Analysis', value = '--', hint = 'Nothing analysed yet', placeholder = True %}
+      {% with label = 'Latest Resume',
+              value = latest_resume.original_filename if latest_resume else '--',
+              hint = latest_resume.uploaded_at if latest_resume else 'Nothing uploaded yet',
+              placeholder = not latest_resume %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
