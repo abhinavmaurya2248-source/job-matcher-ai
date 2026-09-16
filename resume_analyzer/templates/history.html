@@ -3,48 +3,42 @@
 {% block title %}Analysis History - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Analysis History', sub = 'Past analyses will be listed here once storage is added.' %}
+{% with heading = 'Analysis History', sub = 'Your own resumes and analyses, read from the database.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
 <div class="container py-4">
-  <div class="card">
-    <div class="card-header bg-transparent">
-      <div class="row g-2 align-items-center">
-        <div class="col-md-6">
-          <input class="form-control form-control-sm" type="search" placeholder="Search by resume or job title" disabled />
-        </div>
-        <div class="col-md-3">
-          <select class="form-select form-select-sm" disabled>
-            <option>Sort by newest</option>
-          </select>
-        </div>
-        <div class="col-md-3 text-md-end">
-          <a class="btn btn-sm btn-accent" href="{{ url_for('analyze') }}">New analysis</a>
-        </div>
-      </div>
+  <div class="card mb-3">
+    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Uploaded resumes</span>
+      <a class="btn btn-sm btn-accent" href="{{ url_for('analyze') }}">Upload resume</a>
     </div>
-
     <div class="card-body">
-      {% if analyses %}
+      {% if resumes %}
         <div class="table-responsive">
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Resume</th><th>Job</th><th>Match Score</th><th>Date</th>
-                <th class="text-end">Actions</th>
+                <th>Resume</th><th>Size</th><th>Uploaded</th><th class="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {% for row in analyses %}
+              {% for row in resumes %}
                 <tr>
-                  <td>{{ row.resume }}</td>
-                  <td>{{ row.job }}</td>
-                  <td><span class="badge badge-soft">{{ row.score }}</span></td>
-                  <td class="small text-muted-soft">{{ row.date }}</td>
+                  <td>{{ row.original_filename }}</td>
+                  <td class="small text-muted-soft">
+                    {{ ((row.file_size or 0) / 1024) | round(2) }} KB
+                  </td>
+                  <td class="small text-muted-soft">{{ row.uploaded_at }}</td>
                   <td class="text-end">
-                    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('result_placeholder') }}">View</a>
-                    <button class="btn btn-sm btn-outline-danger" type="button" disabled>Delete</button>
+                    <form
+                      class="d-inline"
+                      method="post"
+                      action="{{ url_for('delete_resume', resume_id=row.id) }}"
+                      onsubmit="return confirm('Delete this resume?');"
+                    >
+                      <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
+                    </form>
                   </td>
                 </tr>
               {% endfor %}
@@ -52,8 +46,50 @@
           </table>
         </div>
       {% else %}
-        {% with title = 'No history yet',
-                message = 'Analyses are saved after the database milestone. Search and delete are disabled until then.',
+        {% with title = 'No resumes yet',
+                message = 'Upload a PDF resume and it will be saved to your account.',
+                action_url = url_for('analyze'),
+                action_label = 'Upload Resume' %}
+          {% include "partials/empty_state.html" %}
+        {% endwith %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header bg-transparent fw-semibold">Analyses</div>
+
+    <div class="card-body">
+      {% if analyses %}
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+              <tr>
+                <th>Resume</th><th>Match Score</th><th>Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in analyses %}
+                <tr>
+                  <td>{{ row.original_filename }}</td>
+                  <td>
+                    <span class="badge badge-soft">
+                      {{ row.match_score if row.match_score is not none else '--' }}
+                    </span>
+                  </td>
+                  <td class="small text-muted-soft">{{ row.created_at }}</td>
+                  <td class="text-end">
+                    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('result_placeholder') }}">View</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% with title = 'No analyses yet',
+                message = 'Analysis records are created once the matching engine is implemented. The database table is ready.',
                 action_url = url_for('analyze'),
                 action_label = 'Upload Resume' %}
           {% include "partials/empty_state.html" %}
