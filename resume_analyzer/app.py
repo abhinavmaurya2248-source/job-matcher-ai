@@ -269,14 +269,32 @@ def register_routes(app: Flask) -> None:
         stored_path = os.path.join(app.config["UPLOAD_FOLDER"], stored_name)
         uploaded_file.save(stored_path)
 
-        file_size_kb = round(os.path.getsize(stored_path) / 1024, 2)
+        file_size_bytes = os.path.getsize(stored_path)
+        file_size_kb = round(file_size_bytes / 1024, 2)
 
         # The job description is captured by the form but not analysed yet.
         job_description = (request.form.get("job_description") or "").strip()
 
+        # Milestone 4: store the resume metadata for the logged-in user.
+        try:
+            resume_id = db.create_resume(
+                user_id=current_user()["id"],
+                original_filename=safe_name,
+                stored_filename=stored_name,
+                file_path=stored_path,
+                file_size=file_size_bytes,
+            )
+        except sqlite3.Error:
+            resume_id = None
+            flash(
+                "The file was uploaded but could not be saved to the database.",
+                "error",
+            )
+
         return render_template(
             "result.html",
             uploaded={
+                "resume_id": resume_id,
                 "original_name": safe_name,
                 "stored_name": stored_name,
                 "file_size_kb": file_size_kb,
