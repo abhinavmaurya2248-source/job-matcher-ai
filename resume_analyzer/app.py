@@ -156,8 +156,24 @@ def register_routes(app: Flask) -> None:
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        """Dashboard UI. No real statistics exist yet, so nothing is faked."""
-        return render_template("dashboard.html")
+        """Dashboard UI. Counts come from the database; the score stays a
+        placeholder because no analysis engine exists yet."""
+        user = current_user()
+        try:
+            resume_count = db.count_resumes(user["id"])
+            analysis_count = db.count_analyses(user["id"])
+            resumes = db.list_resumes(user["id"])
+        except sqlite3.Error:
+            flash("Could not read your data. Please try again.", "error")
+            resume_count = analysis_count = 0
+            resumes = []
+
+        return render_template(
+            "dashboard.html",
+            resume_count=resume_count,
+            analysis_count=analysis_count,
+            latest_resume=resumes[0] if resumes else None,
+        )
 
     @app.route("/analyze")
     @login_required
@@ -174,8 +190,42 @@ def register_routes(app: Flask) -> None:
     @app.route("/history")
     @login_required
     def history():
-        """Analysis history UI with an empty state (no database yet)."""
-        return render_template("history.html", analyses=[])
+        """History page - real resume records plus (still empty) analyses,
+        always scoped to the logged-in user."""
+        user = current_user()
+        try:
+            analyses = db.list_analyses(user["id"])
+            resumes = db.list_resumes(user["id"])
+        except sqlite3.Error:
+            flash("Could not read your history. Please try again.", "error")
+            analyses, resumes = [], []
+
+        return render_template("history.html", analyses=analyses, resumes=resumes)
+
+    @app.route("/resumes/<int:resume_id>/delete", methods=["POST"])
+    @login_required
+    def delete_resume(resume_id: int):
+        """Delete one of the logged-in user's own uploaded resumes."""
+        user = current_user()
+        try:
+            record = db.find_resume(resume_id, user["id"])
+            if record is None:
+                flash("That resume was not found in your account.", "error")
+                return redirect(url_for("history"))
+
+            db.delete_resume(resume_id, user["id"])
+        except sqlite3.Error:
+            flash("Database error while deleting the resume.", "error")
+            return redirect(url_for("history"))
+
+        # Remove the stored file too, but never fail the request over it.
+        try:
+            os.remove(record["file_path"])
+        except OSError:
+            pass
+
+        flash("Resume deleted.", "success")
+        return redirect(url_for("history"))
 
     @app.route("/profile")
     @login_required
