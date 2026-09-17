@@ -276,9 +276,10 @@ def register_routes(app: Flask) -> None:
         job_description = (request.form.get("job_description") or "").strip()
 
         # Milestone 4: store the resume metadata for the logged-in user.
+        user_id = current_user()["id"]
         try:
             resume_id = db.create_resume(
-                user_id=current_user()["id"],
+                user_id=user_id,
                 original_filename=safe_name,
                 stored_filename=stored_name,
                 file_path=stored_path,
@@ -291,6 +292,45 @@ def register_routes(app: Flask) -> None:
                 "error",
             )
 
+        # Milestone 5: read the text out of the PDF with PyMuPDF.
+        extraction = {"status": "failed", "message": None, "page_count": None,
+                      "char_count": None, "preview": None}
+        try:
+            result = extractor.extract_text(stored_path)
+        except extractor.ExtractionError as error:
+            extraction["message"] = str(error)
+            flash(str(error), "error")
+            if resume_id is not None:
+                try:
+                    db.save_extracted_text(
+                        resume_id, user_id, None, None, 0, "failed"
+                    )
+                except sqlite3.Error:
+                    pass
+        else:
+            extraction.update(
+                status="success",
+                page_count=result["page_count"],
+                char_count=result["char_count"],
+                preview=extractor.preview(result["text"]),
+            )
+            if resume_id is not None:
+                try:
+                    db.save_extracted_text(
+                        resume_id,
+                        user_id,
+                        result["text"],
+                        result["page_count"],
+                        result["char_count"],
+                        "success",
+                    )
+                except sqlite3.Error:
+                    flash(
+                        "Text was extracted but could not be saved to the database.",
+                        "error",
+                    )
+            flash("Resume text extracted successfully.", "success")
+
         return render_template(
             "result.html",
             uploaded={
@@ -300,6 +340,7 @@ def register_routes(app: Flask) -> None:
                 "file_size_kb": file_size_kb,
                 "job_description_chars": len(job_description),
             },
+            extraction=extraction,
         )
 
     @app.errorhandler(413)
