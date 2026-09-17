@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS resumes (
     file_path         TEXT NOT NULL,
     file_size         INTEGER,
     uploaded_at       TIMESTAMP NOT NULL DEFAULT (datetime('now')),
+    extracted_text    TEXT,
+    page_count        INTEGER,
+    char_count        INTEGER,
+    extraction_status TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
