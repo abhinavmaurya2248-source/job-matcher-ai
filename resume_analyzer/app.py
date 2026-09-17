@@ -22,6 +22,7 @@ from werkzeug.utils import secure_filename
 
 import auth
 import db
+import extractor
 from auth import current_user, login_required
 from config import Config
 
