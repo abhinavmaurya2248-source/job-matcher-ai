@@ -76,11 +76,35 @@ def close_db(_error=None) -> None:
         connection.close()
 
 
+# Columns added after the first release. Each one is created only when the
+# existing database does not have it yet - nothing is dropped or recreated.
+RESUME_MIGRATIONS = {
+    "extracted_text": "TEXT",
+    "page_count": "INTEGER",
+    "char_count": "INTEGER",
+    "extraction_status": "TEXT",
+}
+
+
+def migrate_db(connection: sqlite3.Connection) -> None:
+    """Safely add missing columns to an existing resumes table."""
+    existing = {
+        row["name"] if isinstance(row, sqlite3.Row) else row[1]
+        for row in connection.execute("PRAGMA table_info(resumes)")
+    }
+    for column, column_type in RESUME_MIGRATIONS.items():
+        if column not in existing:
+            connection.execute(
+                f"ALTER TABLE resumes ADD COLUMN {column} {column_type}"
+            )
+
+
 def init_db(app: Flask) -> None:
     """Create the database file and tables if they do not exist yet."""
     with sqlite3.connect(app.config["DATABASE"]) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript(SCHEMA)
+        migrate_db(connection)
 
 
 def init_app(app: Flask) -> None:
