@@ -30,6 +30,15 @@
                   <td class="small text-muted-soft">
                     {{ ((row.file_size or 0) / 1024) | round(2) }} KB
                   </td>
+                  <td class="small">
+                    {% if row.extraction_status == 'success' %}
+                      <span class="badge text-bg-success">{{ row.char_count or 0 }} chars</span>
+                    {% elif row.extraction_status %}
+                      <span class="badge text-bg-warning">No text</span>
+                    {% else %}
+                      <span class="badge badge-soft">--</span>
+                    {% endif %}
+                  </td>
                   <td class="small text-muted-soft">{{ row.uploaded_at }}</td>
                   <td class="text-end">
                     <form
