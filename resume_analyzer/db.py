@@ -264,3 +264,34 @@ def delete_analysis(analysis_id: int, user_id: int) -> bool:
     )
     db.commit()
     return cursor.rowcount > 0
+
+
+# ------------------------------------------------- extracted resume text
+# Always scoped by user_id so one user can never touch another's resume.
+
+def save_extracted_text(
+    resume_id: int,
+    user_id: int,
+    extracted_text: Optional[str],
+    page_count: Optional[int],
+    char_count: Optional[int],
+    extraction_status: str,
+) -> bool:
+    """Store the extraction result on the user's own resume record."""
+    db = get_db()
+    cursor = db.execute(
+        """UPDATE resumes
+              SET extracted_text = ?, page_count = ?, char_count = ?,
+                  extraction_status = ?
+            WHERE id = ? AND user_id = ?""",
+        (
+            extracted_text,
+            page_count,
+            char_count,
+            extraction_status,
+            resume_id,
+            user_id,
+        ),
+    )
+    db.commit()
+    return cursor.rowcount > 0
