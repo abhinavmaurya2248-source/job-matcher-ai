@@ -31,6 +31,10 @@ CREATE TABLE IF NOT EXISTS resumes (
     file_path         TEXT NOT NULL,
     file_size         INTEGER,
     uploaded_at       TIMESTAMP NOT NULL DEFAULT (datetime('now')),
+    extracted_text    TEXT,
+    page_count        INTEGER,
+    char_count        INTEGER,
+    extraction_status TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -72,11 +76,35 @@ def close_db(_error=None) -> None:
         connection.close()
 
 
+# Columns added after the first release. Each one is created only when the
+# existing database does not have it yet - nothing is dropped or recreated.
+RESUME_MIGRATIONS = {
+    "extracted_text": "TEXT",
+    "page_count": "INTEGER",
+    "char_count": "INTEGER",
+    "extraction_status": "TEXT",
+}
+
+
+def migrate_db(connection: sqlite3.Connection) -> None:
+    """Safely add missing columns to an existing resumes table."""
+    existing = {
+        row["name"] if isinstance(row, sqlite3.Row) else row[1]
+        for row in connection.execute("PRAGMA table_info(resumes)")
+    }
+    for column, column_type in RESUME_MIGRATIONS.items():
+        if column not in existing:
+            connection.execute(
+                f"ALTER TABLE resumes ADD COLUMN {column} {column_type}"
+            )
+
+
 def init_db(app: Flask) -> None:
     """Create the database file and tables if they do not exist yet."""
     with sqlite3.connect(app.config["DATABASE"]) as connection:
         connection.execute("PRAGMA foreign_keys = ON")
         connection.executescript(SCHEMA)
+        migrate_db(connection)
 
 
 def init_app(app: Flask) -> None:
@@ -233,6 +261,37 @@ def delete_analysis(analysis_id: int, user_id: int) -> bool:
     db = get_db()
     cursor = db.execute(
         "DELETE FROM analyses WHERE id = ? AND user_id = ?", (analysis_id, user_id)
+    )
+    db.commit()
+    return cursor.rowcount > 0
+
+
+# ------------------------------------------------- extracted resume text
+# Always scoped by user_id so one user can never touch another's resume.
+
+def save_extracted_text(
+    resume_id: int,
+    user_id: int,
+    extracted_text: Optional[str],
+    page_count: Optional[int],
+    char_count: Optional[int],
+    extraction_status: str,
+) -> bool:
+    """Store the extraction result on the user's own resume record."""
+    db = get_db()
+    cursor = db.execute(
+        """UPDATE resumes
+              SET extracted_text = ?, page_count = ?, char_count = ?,
+                  extraction_status = ?
+            WHERE id = ? AND user_id = ?""",
+        (
+            extracted_text,
+            page_count,
+            char_count,
+            extraction_status,
+            resume_id,
+            user_id,
+        ),
     )
     db.commit()
     return cursor.rowcount > 0
