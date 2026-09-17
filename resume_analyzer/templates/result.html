@@ -9,17 +9,48 @@
 
 <div class="container py-4">
   {% if uploaded %}
-    <div class="alert alert-success">
+    {% set ex = extraction if extraction is defined else None %}
+    <div class="alert {{ 'alert-success' if ex and ex.status == 'success' else 'alert-warning' }}">
       <p class="fw-semibold mb-2">Resume uploaded successfully</p>
       <div class="row small gy-1">
         <div class="col-sm-6">File name: <strong>{{ uploaded.original_name }}</strong></div>
-        <div class="col-sm-6">Stored as: <strong>{{ uploaded.stored_name }}</strong></div>
         <div class="col-sm-6">Size: <strong>{{ uploaded.file_size_kb }} KB</strong></div>
+        <div class="col-sm-6">
+          Extraction status:
+          {% if ex and ex.status == 'success' %}
+            <span class="badge text-bg-success">Text extracted</span>
+          {% else %}
+            <span class="badge text-bg-warning">No text extracted</span>
+          {% endif %}
+        </div>
+        <div class="col-sm-6">
+          Pages: <strong>{{ ex.page_count if ex and ex.page_count is not none else '--' }}</strong>
+        </div>
+        <div class="col-sm-6">
+          Extracted characters:
+          <strong>{{ ex.char_count if ex and ex.char_count is not none else '--' }}</strong>
+        </div>
         <div class="col-sm-6">
           Job description length: <strong>{{ uploaded.job_description_chars }} characters</strong>
         </div>
       </div>
+      {% if ex and ex.status != 'success' and ex.message %}
+        <p class="small mb-0 mt-2">{{ ex.message }}</p>
+      {% endif %}
     </div>
+
+    {% if ex and ex.preview %}
+      <div class="card mb-3">
+        <div class="card-header bg-transparent fw-semibold">Extracted text preview</div>
+        <div class="card-body">
+          <pre class="small mb-2" style="white-space: pre-wrap;">{{ ex.preview }}</pre>
+          <p class="small text-muted-soft mb-0">
+            Only the beginning of the extracted text is shown. The full text is stored
+            privately with your resume record.
+          </p>
+        </div>
+      </div>
+    {% endif %}
   {% else %}
     <div class="alert alert-info">
       No analysis has been run. Upload a resume from the
