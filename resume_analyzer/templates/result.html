@@ -39,6 +39,36 @@
       {% endif %}
     </div>
 
+    {% set nl = nlp if nlp is defined else None %}
+    {% if nl and nl.status == 'success' %}
+      <div class="card mb-3">
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Technical skills found</span>
+          <span class="badge badge-soft">{{ nl.skills | length }} skill(s)</span>
+        </div>
+        <div class="card-body">
+          {% if nl.skills %}
+            {% for category, names in nl.by_category.items() %}
+              <p class="stat-label mb-1">{{ category }}</p>
+              <p class="mb-3">
+                {% for name in names %}
+                  <span class="badge text-bg-success me-1 mb-1">{{ name }}</span>
+                {% endfor %}
+              </p>
+            {% endfor %}
+            <p class="small text-muted-soft mb-0">
+              Detected from your resume text using a fixed technical skill list.
+              No job comparison or match score is calculated yet.
+            </p>
+          {% else %}
+            <p class="mb-0">No recognized technical skills were found in this resume.</p>
+          {% endif %}
+        </div>
+      </div>
+    {% elif nl and nl.message %}
+      <div class="alert alert-warning">{{ nl.message }}</div>
+    {% endif %}
+
     {% if ex and ex.preview %}
       <div class="card mb-3">
         <div class="card-header bg-transparent fw-semibold">Extracted text preview</div>
