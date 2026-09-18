@@ -12,6 +12,7 @@ Run:
 Then open http://127.0.0.1:5000
 """
 
+import json
 import os
 import sqlite3
 import uuid
@@ -25,6 +26,7 @@ import db
 import extractor
 from auth import current_user, login_required
 from config import Config
+from nlp import skill_extractor, text_processor
 
 
 def create_app() -> Flask:
@@ -296,6 +298,9 @@ def register_routes(app: Flask) -> None:
         # Milestone 5: read the text out of the PDF with PyMuPDF.
         extraction = {"status": "failed", "message": None, "page_count": None,
                       "char_count": None, "preview": None}
+        # Milestone 6: NLP result shown on the result page.
+        nlp = {"status": "skipped", "message": None, "skills": [],
+               "by_category": {}, "token_count": None, "nltk_stopwords": None}
         try:
             result = extractor.extract_text(stored_path)
         except extractor.ExtractionError as error:
@@ -332,6 +337,42 @@ def register_routes(app: Flask) -> None:
                     )
             flash("Resume text extracted successfully.", "success")
 
+            # Milestone 6: NLP preprocessing + rule-based skill extraction.
+            # This works on the text extracted above, never on the PDF itself.
+            try:
+                processed = text_processor.preprocess(result["text"])
+                skills = skill_extractor.extract_skills(result["text"])
+            except ValueError as error:
+                nlp["message"] = str(error)
+            except Exception:
+                nlp["message"] = (
+                    "The resume text could not be analysed. Please try again."
+                )
+            else:
+                nlp.update(
+                    status="success",
+                    skills=skills["skills"],
+                    by_category=skills["by_category"],
+                    token_count=len(processed["tokens"]),
+                    nltk_stopwords=text_processor.NLTK_STOPWORDS_AVAILABLE,
+                )
+                if resume_id is not None:
+                    try:
+                        db.save_nlp_result(
+                            resume_id,
+                            user_id,
+                            processed["cleaned_text"],
+                            json.dumps(skills["skills"]),
+                        )
+                    except sqlite3.Error:
+                        flash(
+                            "Skills were detected but could not be saved to the "
+                            "database.",
+                            "error",
+                        )
+            if nlp["message"]:
+                flash(nlp["message"], "error")
+
         return render_template(
             "result.html",
             uploaded={
@@ -342,6 +383,7 @@ def register_routes(app: Flask) -> None:
                 "job_description_chars": len(job_description),
             },
             extraction=extraction,
+            nlp=nlp,
         )
 
     @app.errorhandler(413)
