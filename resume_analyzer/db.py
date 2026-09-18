@@ -300,3 +300,24 @@ def save_extracted_text(
     )
     db.commit()
     return cursor.rowcount > 0
+
+
+# ------------------------------------------------- NLP output (Milestone 6)
+
+def save_nlp_result(
+    resume_id: int,
+    user_id: int,
+    cleaned_text: Optional[str],
+    extracted_skills: Optional[str],
+) -> bool:
+    """Store the cleaned text and the JSON skill list on the user's own
+    resume record. `extracted_skills` is JSON text, e.g. '["Python","Git"]'."""
+    db = get_db()
+    cursor = db.execute(
+        """UPDATE resumes
+              SET cleaned_text = ?, extracted_skills = ?
+            WHERE id = ? AND user_id = ?""",
+        (cleaned_text, extracted_skills, resume_id, user_id),
+    )
+    db.commit()
+    return cursor.rowcount > 0
