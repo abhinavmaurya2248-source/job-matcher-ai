@@ -21,7 +21,7 @@ from typing import List
 # `stopwords` is the only NLTK resource we need. If it is missing we fall
 # back to the small list below instead of failing.
 FALLBACK_STOPWORDS = {
-    "a", "об", "about", "above", "after", "again", "all", "also", "am", "an",
+    "a", "about", "above", "after", "again", "all", "also", "am", "an",
     "and", "any", "are", "as", "at", "be", "because", "been", "before",
     "being", "below", "between", "both", "but", "by", "can", "did", "do",
     "does", "doing", "down", "during", "each", "few", "for", "from",
