@@ -35,6 +35,8 @@ CREATE TABLE IF NOT EXISTS resumes (
     page_count        INTEGER,
     char_count        INTEGER,
     extraction_status TEXT,
+    cleaned_text      TEXT,
+    extracted_skills  TEXT,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
@@ -83,6 +85,9 @@ RESUME_MIGRATIONS = {
     "page_count": "INTEGER",
     "char_count": "INTEGER",
     "extraction_status": "TEXT",
+    # Milestone 6: NLP output.
+    "cleaned_text": "TEXT",
+    "extracted_skills": "TEXT",
 }
 
 
