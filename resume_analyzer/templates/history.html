@@ -19,7 +19,7 @@
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Resume</th><th>Size</th><th>Text</th><th>Uploaded</th>
+                <th>Resume</th><th>Size</th><th>Text</th><th>Skills</th><th>Uploaded</th>
                 <th class="text-end">Actions</th>
               </tr>
             </thead>
@@ -35,6 +35,15 @@
                       <span class="badge text-bg-success">{{ row.char_count or 0 }} chars</span>
                     {% elif row.extraction_status %}
                       <span class="badge text-bg-warning">No text</span>
+                    {% else %}
+                      <span class="badge badge-soft">--</span>
+                    {% endif %}
+                  </td>
+                  <td class="small">
+                    {% if row.extracted_skills %}
+                      <span class="badge badge-soft">
+                        {{ row.extracted_skills | from_json | length }} found
+                      </span>
                     {% else %}
                       <span class="badge badge-soft">--</span>
                     {% endif %}
