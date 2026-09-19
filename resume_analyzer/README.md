@@ -57,3 +57,16 @@ Open http://127.0.0.1:5000
 - No user authentication; single-user local demo.
 - This Flask app runs locally with `python app.py`; the Lovable preview
   does not execute Python, so testing is done on your machine.
+
+## NLTK data (Milestone 6)
+
+Skill extraction and text cleaning are pure Python, but stop-word removal
+uses NLTK's small `stopwords` corpus. Download it once:
+
+```
+python -m nltk.downloader stopwords
+```
+
+If the corpus is missing, the app does **not** crash - it falls back to a
+small built-in English stop-word list. No other NLTK data is required
+(the tokenizer is a regular expression, so `punkt` is not needed).
