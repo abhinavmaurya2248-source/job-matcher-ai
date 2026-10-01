@@ -26,7 +26,7 @@ import db
 import extractor
 from auth import current_user, login_required
 from config import Config
-from nlp import skill_extractor, text_processor
+from nlp import matcher, skill_extractor, text_processor
 
 
 def create_app() -> Flask:
@@ -48,11 +48,7 @@ def create_app() -> Flask:
     # Templates store skills as JSON text; this turns it back into a list.
     @app.template_filter("from_json")
     def from_json_filter(value):
-        try:
-            data = json.loads(value or "[]")
-        except (TypeError, ValueError):
-            return []
-        return data if isinstance(data, list) else []
+        return from_json_list(value)
 
     register_routes(app)
     return app
@@ -64,6 +60,90 @@ def allowed_file(filename: str) -> bool:
         return False
     extension = filename.rsplit(".", 1)[1].lower()
     return extension in Config.ALLOWED_EXTENSIONS
+
+
+def from_json_list(value) -> list:
+    """Read a JSON list that was stored as text; never raises."""
+    try:
+        data = json.loads(value or "[]")
+    except (TypeError, ValueError):
+        return []
+    return data if isinstance(data, list) else []
+
+
+def empty_match(message=None, status="skipped") -> dict:
+    """Default (not analysed) matching result used by the result page."""
+    return {
+        "status": status,
+        "message": message,
+        "match_score": None,
+        "similarity_percent": None,
+        "skill_match_percent": None,
+        "matched_skills": [],
+        "missing_skills": [],
+        "job_skills": [],
+        "resume_skills": [],
+        "score_basis": None,
+        "analysis_id": None,
+    }
+
+
+def run_matching(resume_id, user_id: int, job_description: str) -> dict:
+    """Milestone 7: compare one of the user's own resumes with a job
+    description, then store the analysis.
+
+    The resume text is read back from the database (never re-extracted),
+    and the query is scoped to `user_id`, so one user can never analyse
+    another user's resume by changing an id.
+    """
+    if not job_description or not job_description.strip():
+        return empty_match("Please paste a job description to analyse the resume.")
+
+    if resume_id is None:
+        return empty_match("The resume record could not be found for analysis.")
+
+    try:
+        record = db.find_resume(resume_id, user_id)
+    except sqlite3.Error:
+        return empty_match("Database error while reading the resume.")
+
+    if record is None:
+        return empty_match("That resume was not found in your account.")
+
+    resume_text = record["extracted_text"]
+    if not resume_text or not resume_text.strip():
+        return empty_match(
+            "This resume has no readable text, so it cannot be compared with a "
+            "job description."
+        )
+
+    try:
+        analysis = matcher.analyze(resume_text, job_description)
+    except matcher.MatchError as error:
+        return empty_match(str(error))
+    except Exception:
+        return empty_match("The analysis could not be completed. Please try again.")
+
+    result = empty_match(status="success")
+    result.update(analysis)
+    result["status"] = "success"
+    result["message"] = None
+
+    try:
+        result["analysis_id"] = db.create_analysis(
+            user_id=user_id,
+            resume_id=resume_id,
+            job_description=job_description,
+            match_score=analysis["match_score"],
+            matched_skills=json.dumps(analysis["matched_skills"]),
+            missing_skills=json.dumps(analysis["missing_skills"]),
+        )
+    except sqlite3.Error:
+        result["message"] = (
+            "The analysis was completed but could not be saved to the database."
+        )
+
+    return result
 
 
 def register_routes(app: Flask) -> None:
@@ -196,8 +276,44 @@ def register_routes(app: Flask) -> None:
     @app.route("/result")
     @login_required
     def result_placeholder():
-        """Empty result layout, shown before any analysis engine exists."""
-        return render_template("result.html", uploaded=None)
+        """Empty result layout (no analysis selected)."""
+        return render_template("result.html", uploaded=None, match=empty_match())
+
+    @app.route("/analyses/<int:analysis_id>")
+    @login_required
+    def analysis_detail(analysis_id: int):
+        """Show one saved analysis - only if it belongs to this user."""
+        user = current_user()
+        try:
+            record = db.find_analysis(analysis_id, user["id"])
+        except sqlite3.Error:
+            flash("Database error while reading the analysis.", "error")
+            return redirect(url_for("history"))
+
+        if record is None:
+            flash("That analysis was not found in your account.", "error")
+            return redirect(url_for("history"))
+
+        match = empty_match(status="success")
+        match.update(
+            match_score=record["match_score"],
+            matched_skills=from_json_list(record["matched_skills"]),
+            missing_skills=from_json_list(record["missing_skills"]),
+            analysis_id=record["id"],
+        )
+
+        return render_template(
+            "result.html",
+            uploaded={
+                "resume_id": record["resume_id"],
+                "original_name": record["original_filename"],
+                "stored_name": None,
+                "file_size_kb": None,
+                "job_description_chars": len(record["job_description"] or ""),
+            },
+            saved=record,
+            match=match,
+        )
 
     @app.route("/history")
     @login_required
@@ -307,6 +423,8 @@ def register_routes(app: Flask) -> None:
         # Milestone 5: read the text out of the PDF with PyMuPDF.
         extraction = {"status": "failed", "message": None, "page_count": None,
                       "char_count": None, "preview": None}
+        match = empty_match("The resume text could not be read, so no analysis "
+                            "was performed.")
         # Milestone 6: NLP result shown on the result page.
         nlp = {"status": "skipped", "message": None, "skills": [],
                "by_category": {}, "token_count": None, "nltk_stopwords": None}
@@ -382,6 +500,18 @@ def register_routes(app: Flask) -> None:
             if nlp["message"]:
                 flash(nlp["message"], "error")
 
+            # Milestone 7: TF-IDF + cosine similarity + skill comparison.
+            match = run_matching(resume_id, user_id, job_description)
+            if match["status"] == "success":
+                flash(
+                    f"Analysis complete. Match score: {match['match_score']}%.",
+                    "success",
+                )
+                if match["message"]:
+                    flash(match["message"], "error")
+            elif match["message"]:
+                flash(match["message"], "error")
+
         return render_template(
             "result.html",
             uploaded={
@@ -393,6 +523,7 @@ def register_routes(app: Flask) -> None:
             },
             extraction=extraction,
             nlp=nlp,
+            match=match,
         )
 
     @app.errorhandler(413)

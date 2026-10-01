@@ -3,7 +3,7 @@
 {% block title %}Analysis Result - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Analysis Result', sub = 'Layout is ready and will be filled by the Flask backend once analysis is implemented.' %}
+{% with heading = 'Analysis Result', sub = 'Match score calculated from your resume text and the job description using TF-IDF and cosine similarity.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
@@ -33,6 +33,14 @@
         <div class="col-sm-6">
           Job description length: <strong>{{ uploaded.job_description_chars }} characters</strong>
         </div>
+        <div class="col-sm-6">
+          Job description analysis:
+          {% if match is defined and match and match.status == 'success' %}
+            <span class="badge text-bg-success">Analysed</span>
+          {% else %}
+            <span class="badge text-bg-warning">Not analysed</span>
+          {% endif %}
+        </div>
       </div>
       {% if ex and ex.status != 'success' and ex.message %}
         <p class="small mb-0 mt-2">{{ ex.message }}</p>
@@ -58,7 +66,6 @@
             {% endfor %}
             <p class="small text-muted-soft mb-0">
               Detected from your resume text using a fixed technical skill list.
-              No job comparison or match score is calculated yet.
             </p>
           {% else %}
             <p class="mb-0">No recognized technical skills were found in this resume.</p>
@@ -88,13 +95,31 @@
     </div>
   {% endif %}
 
+  {% set mt = match if match is defined else None %}
+  {% if saved is defined and saved %}
+    <div class="alert alert-info">
+      Saved analysis of <strong>{{ saved.original_filename }}</strong> from
+      {{ saved.created_at }}.
+    </div>
+  {% endif %}
+
+  {% if mt and mt.status != 'success' and mt.message %}
+    <div class="alert alert-warning">{{ mt.message }}</div>
+  {% endif %}
+
   <div class="row g-3">
     <div class="col-lg-4">
       <div class="card text-center h-100">
         <div class="card-body">
           <p class="stat-label mb-2">Resume-Job Match Score</p>
-          <div class="score-circle mx-auto mb-2">--</div>
-          <span class="badge badge-placeholder">Awaiting analysis engine</span>
+          <div class="score-circle mx-auto mb-2">
+            {{ mt.match_score if mt and mt.match_score is not none else '--' }}{% if mt and mt.match_score is not none %}%{% endif %}
+          </div>
+          {% if mt and mt.status == 'success' %}
+            <span class="badge text-bg-success">Calculated from your resume and this job</span>
+          {% else %}
+            <span class="badge badge-placeholder">No analysis yet</span>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -103,16 +128,37 @@
       <div class="card h-100">
         <div class="card-header bg-transparent fw-semibold">Score breakdown</div>
         <div class="card-body">
-          {% for metric in ['Text Similarity', 'Skill Match'] %}
+          {% set rows = [('Text Similarity (TF-IDF + cosine)', mt.similarity_percent if mt else none),
+                         ('Skill Match', mt.skill_match_percent if mt else none)] %}
+          {% for label, value in rows %}
             <div class="mb-3">
               <div class="d-flex justify-content-between small mb-1">
-                <span>{{ metric }}</span><span class="text-muted-soft">--</span>
+                <span>{{ label }}</span>
+                <span class="text-muted-soft">
+                  {{ value ~ '%' if value is not none else '--' }}
+                </span>
               </div>
-              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+              <div class="progress">
+                <div
+                  class="progress-bar {{ 'bg-success' if value is not none else 'bg-secondary' }}"
+                  style="width: {{ value if value is not none else 0 }}%"
+                ></div>
+              </div>
             </div>
           {% endfor %}
           <p class="small text-muted-soft mb-0">
-            These bars stay empty until the similarity and skill-matching modules exist.
+            {% if mt and mt.status == 'success' %}
+              {% if mt.score_basis == 'similarity only' %}
+                The job description lists no recognised technical skills, so the score
+                uses text similarity only.
+              {% elif mt.score_basis %}
+                Final score = 50% text similarity + 50% skill match.
+              {% else %}
+                Score breakdown is not stored for this saved analysis.
+              {% endif %}
+            {% else %}
+              Upload a resume together with a job description to calculate these values.
+            {% endif %}
           </p>
         </div>
       </div>
@@ -120,25 +166,52 @@
 
     <div class="col-md-6">
       <div class="card h-100">
-        <div class="card-header bg-transparent fw-semibold">Matched skills</div>
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Matched skills</span>
+          <span class="badge badge-soft">{{ mt.matched_skills | length if mt else 0 }}</span>
+        </div>
         <div class="card-body">
-          {% with title = 'No matched skills yet', message = 'Skill extraction is implemented in a later milestone.' %}
-            {% include "partials/empty_state.html" %}
-          {% endwith %}
+          {% if mt and mt.matched_skills %}
+            {% for name in mt.matched_skills %}
+              <span class="badge text-bg-success me-1 mb-1">{{ name }}</span>
+            {% endfor %}
+          {% elif mt and mt.status == 'success' %}
+            <p class="mb-0 small">
+              None of the skills named in this job description were found in the resume.
+            </p>
+          {% else %}
+            {% with title = 'No matched skills yet', message = 'Run an analysis with a job description to see matches.' %}
+              {% include "partials/empty_state.html" %}
+            {% endwith %}
+          {% endif %}
         </div>
       </div>
     </div>
 
     <div class="col-md-6">
       <div class="card h-100">
-        <div class="card-header bg-transparent fw-semibold">Missing skills</div>
+        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Missing skills</span>
+          <span class="badge badge-soft">{{ mt.missing_skills | length if mt else 0 }}</span>
+        </div>
         <div class="card-body">
-          {% with title = 'No missing skills yet', message = 'Job requirement comparison is not implemented yet.' %}
-            {% include "partials/empty_state.html" %}
-          {% endwith %}
+          {% if mt and mt.missing_skills %}
+            {% for name in mt.missing_skills %}
+              <span class="badge text-bg-warning me-1 mb-1">{{ name }}</span>
+            {% endfor %}
+          {% elif mt and mt.status == 'success' %}
+            <p class="mb-0 small">
+              The resume covers every recognised skill named in this job description.
+            </p>
+          {% else %}
+            {% with title = 'No missing skills yet', message = 'Run an analysis with a job description to see gaps.' %}
+              {% include "partials/empty_state.html" %}
+            {% endwith %}
+          {% endif %}
         </div>
       </div>
     </div>
+
 
     <div class="col-md-6">
       <div class="card h-100">
