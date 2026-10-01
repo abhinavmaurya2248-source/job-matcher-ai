@@ -48,11 +48,7 @@ def create_app() -> Flask:
     # Templates store skills as JSON text; this turns it back into a list.
     @app.template_filter("from_json")
     def from_json_filter(value):
-        try:
-            data = json.loads(value or "[]")
-        except (TypeError, ValueError):
-            return []
-        return data if isinstance(data, list) else []
+        return from_json_list(value)
 
     register_routes(app)
     return app
