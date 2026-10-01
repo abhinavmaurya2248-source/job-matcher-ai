@@ -66,6 +66,15 @@ def allowed_file(filename: str) -> bool:
     return extension in Config.ALLOWED_EXTENSIONS
 
 
+def from_json_list(value) -> list:
+    """Read a JSON list that was stored as text; never raises."""
+    try:
+        data = json.loads(value or "[]")
+    except (TypeError, ValueError):
+        return []
+    return data if isinstance(data, list) else []
+
+
 def empty_match(message=None, status="skipped") -> dict:
     """Default (not analysed) matching result used by the result page."""
     return {
