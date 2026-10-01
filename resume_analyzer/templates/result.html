@@ -3,7 +3,7 @@
 {% block title %}Analysis Result - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Analysis Result', sub = 'Layout is ready and will be filled by the Flask backend once analysis is implemented.' %}
+{% with heading = 'Analysis Result', sub = 'Match score calculated from your resume text and the job description using TF-IDF and cosine similarity.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
@@ -33,6 +33,14 @@
         <div class="col-sm-6">
           Job description length: <strong>{{ uploaded.job_description_chars }} characters</strong>
         </div>
+        <div class="col-sm-6">
+          Job description analysis:
+          {% if match is defined and match and match.status == 'success' %}
+            <span class="badge text-bg-success">Analysed</span>
+          {% else %}
+            <span class="badge text-bg-warning">Not analysed</span>
+          {% endif %}
+        </div>
       </div>
       {% if ex and ex.status != 'success' and ex.message %}
         <p class="small mb-0 mt-2">{{ ex.message }}</p>
@@ -58,7 +66,6 @@
             {% endfor %}
             <p class="small text-muted-soft mb-0">
               Detected from your resume text using a fixed technical skill list.
-              No job comparison or match score is calculated yet.
             </p>
           {% else %}
             <p class="mb-0">No recognized technical skills were found in this resume.</p>

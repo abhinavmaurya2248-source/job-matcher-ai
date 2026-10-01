@@ -84,7 +84,7 @@
           <table class="table align-middle">
             <thead>
               <tr>
-                <th>Resume</th><th>Match Score</th><th>Date</th>
+                <th>Resume</th><th>Job description</th><th>Match Score</th><th>Date</th>
                 <th class="text-end">Actions</th>
               </tr>
             </thead>
@@ -92,14 +92,20 @@
               {% for row in analyses %}
                 <tr>
                   <td>{{ row.original_filename }}</td>
+                  <td class="small text-muted-soft">
+                    {{ (row.job_description or '') | truncate(70, true) or '--' }}
+                  </td>
                   <td>
-                    <span class="badge badge-soft">
-                      {{ row.match_score if row.match_score is not none else '--' }}
+                    <span class="badge {{ 'text-bg-success' if row.match_score is not none else 'badge-soft' }}">
+                      {{ (row.match_score ~ '%') if row.match_score is not none else '--' }}
                     </span>
                   </td>
                   <td class="small text-muted-soft">{{ row.created_at }}</td>
                   <td class="text-end">
-                    <a class="btn btn-sm btn-outline-dark" href="{{ url_for('result_placeholder') }}">View</a>
+                    <a
+                      class="btn btn-sm btn-outline-dark"
+                      href="{{ url_for('analysis_detail', analysis_id=row.id) }}"
+                    >View</a>
                   </td>
                 </tr>
               {% endfor %}
