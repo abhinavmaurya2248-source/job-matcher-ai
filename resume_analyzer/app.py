@@ -26,7 +26,7 @@ import db
 import extractor
 from auth import current_user, login_required
 from config import Config
-from nlp import skill_extractor, text_processor
+from nlp import matcher, skill_extractor, text_processor
 
 
 def create_app() -> Flask:
@@ -64,6 +64,81 @@ def allowed_file(filename: str) -> bool:
         return False
     extension = filename.rsplit(".", 1)[1].lower()
     return extension in Config.ALLOWED_EXTENSIONS
+
+
+def empty_match(message=None, status="skipped") -> dict:
+    """Default (not analysed) matching result used by the result page."""
+    return {
+        "status": status,
+        "message": message,
+        "match_score": None,
+        "similarity_percent": None,
+        "skill_match_percent": None,
+        "matched_skills": [],
+        "missing_skills": [],
+        "job_skills": [],
+        "resume_skills": [],
+        "score_basis": None,
+        "analysis_id": None,
+    }
+
+
+def run_matching(resume_id, user_id: int, job_description: str) -> dict:
+    """Milestone 7: compare one of the user's own resumes with a job
+    description, then store the analysis.
+
+    The resume text is read back from the database (never re-extracted),
+    and the query is scoped to `user_id`, so one user can never analyse
+    another user's resume by changing an id.
+    """
+    if not job_description or not job_description.strip():
+        return empty_match("Please paste a job description to analyse the resume.")
+
+    if resume_id is None:
+        return empty_match("The resume record could not be found for analysis.")
+
+    try:
+        record = db.find_resume(resume_id, user_id)
+    except sqlite3.Error:
+        return empty_match("Database error while reading the resume.")
+
+    if record is None:
+        return empty_match("That resume was not found in your account.")
+
+    resume_text = record["extracted_text"]
+    if not resume_text or not resume_text.strip():
+        return empty_match(
+            "This resume has no readable text, so it cannot be compared with a "
+            "job description."
+        )
+
+    try:
+        analysis = matcher.analyze(resume_text, job_description)
+    except matcher.MatchError as error:
+        return empty_match(str(error))
+    except Exception:
+        return empty_match("The analysis could not be completed. Please try again.")
+
+    result = empty_match(status="success")
+    result.update(analysis)
+    result["status"] = "success"
+    result["message"] = None
+
+    try:
+        result["analysis_id"] = db.create_analysis(
+            user_id=user_id,
+            resume_id=resume_id,
+            job_description=job_description,
+            match_score=analysis["match_score"],
+            matched_skills=json.dumps(analysis["matched_skills"]),
+            missing_skills=json.dumps(analysis["missing_skills"]),
+        )
+    except sqlite3.Error:
+        result["message"] = (
+            "The analysis was completed but could not be saved to the database."
+        )
+
+    return result
 
 
 def register_routes(app: Flask) -> None:
