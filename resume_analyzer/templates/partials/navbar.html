@@ -1,7 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark app-navbar sticky-top" aria-label="Main navigation">
   <div class="container">
-    <a class="navbar-brand fw-semibold" href="{{ url_for('index') }}">
-      <span class="brand-mark">AI</span> Resume Analyzer
+    <a class="navbar-brand" href="{{ url_for('index') }}">
+      <span class="brand-mark" aria-hidden="true">AI</span> ResumeAI
     </a>
     <button
       class="navbar-toggler"
@@ -16,7 +16,7 @@
     </button>
 
     <div class="collapse navbar-collapse" id="mainNav">
-      <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
+      <ul class="navbar-nav mx-lg-auto gap-lg-1">
         <li class="nav-item">
           <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('index') }}">Home</a>
         </li>
@@ -24,29 +24,31 @@
           <a class="nav-link {% if request.path == '/dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">Dashboard</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/analyze' %}active{% endif %}" href="{{ url_for('analyze') }}">Analyze</a>
+          <a class="nav-link {% if request.path in ['/analyze', '/upload'] %}active{% endif %}" href="{{ url_for('analyze') }}">Analyze Resume</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if request.path == '/history' %}active{% endif %}" href="{{ url_for('history') }}">History</a>
+          <a class="nav-link {% if request.path == '/history' or request.path.startswith('/analyses') %}active{% endif %}" href="{{ url_for('history') }}">History</a>
         </li>
         <li class="nav-item">
           <a class="nav-link {% if request.path == '/profile' %}active{% endif %}" href="{{ url_for('profile') }}">Profile</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin_login') }}">Admin</a>
-        </li>
+      </ul>
+      <ul class="navbar-nav align-items-lg-center gap-2 mt-2 mt-lg-0">
         {% if current_user %}
-          <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
-            <span class="navbar-text small">Signed in as <span class="fw-semibold">{{ current_user['full_name'] }}</span></span>
+          <li class="nav-item">
+            <span class="nav-user">
+              <span class="nav-avatar" aria-hidden="true">{{ current_user['full_name'][0]|upper }}</span>
+              <span class="d-lg-none d-xl-inline">Signed in as <span class="fw-semibold text-light">{{ current_user['full_name'] }}</span></span>
+            </span>
           </li>
-          <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
-            <a class="btn btn-outline-light btn-sm px-3" href="{{ url_for('logout') }}">Logout</a>
+          <li class="nav-item">
+            <a class="btn btn-ghost btn-sm px-3" href="{{ url_for('logout') }}">Logout</a>
           </li>
         {% else %}
-          <li class="nav-item mt-2 mt-lg-0 ms-lg-2">
-            <a class="btn btn-outline-light btn-sm px-3" href="{{ url_for('login') }}">Login</a>
+          <li class="nav-item">
+            <a class="btn btn-ghost btn-sm px-3" href="{{ url_for('login') }}">Login</a>
           </li>
-          <li class="nav-item mt-2 mt-lg-0">
+          <li class="nav-item">
             <a class="btn btn-accent btn-sm px-3" href="{{ url_for('register') }}">Register</a>
           </li>
         {% endif %}

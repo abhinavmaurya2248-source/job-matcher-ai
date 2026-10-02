@@ -1,9 +1,9 @@
 {# Reusable statistic card.
-   Params: label, value, hint (optional), placeholder (bool) #}
-<div class="card stat-card h-100">
+   Params: label, value, hint (optional), placeholder (bool), text_value (bool) #}
+<div class="card stat-card card-hover h-100">
   <div class="card-body">
-    <p class="stat-label mb-1">{{ label }}</p>
-    <p class="stat-value mb-1">{{ value }}</p>
+    <p class="stat-label mb-3">{{ label }}</p>
+    <p class="stat-value {{ 'is-text' if text_value else '' }} mb-2">{{ value }}</p>
     {% if hint %}<p class="small text-muted-soft mb-0">{{ hint }}</p>{% endif %}
     {% if placeholder %}
       <span class="badge badge-placeholder mt-2">Placeholder</span>

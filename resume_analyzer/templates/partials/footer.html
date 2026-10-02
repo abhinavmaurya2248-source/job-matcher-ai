@@ -1,11 +1,14 @@
 <footer class="app-footer mt-5">
   <div class="container py-4">
     <div class="row gy-3 align-items-center">
-      <div class="col-md-6">
-        <p class="mb-1 fw-semibold">AI-Based Resume Analyzer and Job Matching System</p>
-        <p class="mb-0 small text-muted-soft">BCA Minor Project - Python, Flask, Jinja, Bootstrap</p>
+      <div class="col-md-7">
+        <p class="mb-1 fw-semibold d-flex align-items-center gap-2">
+          <span class="brand-mark" aria-hidden="true">AI</span>
+          AI-Based Resume Analyzer and Job Matching System
+        </p>
+        <p class="mb-0 small text-muted-soft">BCA Minor Project &middot; Python, Flask, scikit-learn, NLTK, SQLite, Bootstrap</p>
       </div>
-      <div class="col-md-6 text-md-end small">
+      <div class="col-md-5 text-md-end small">
         <a class="footer-link" href="{{ url_for('index') }}">Home</a>
         <a class="footer-link" href="{{ url_for('analyze') }}">Analyze</a>
         <a class="footer-link" href="{{ url_for('history') }}">History</a>
