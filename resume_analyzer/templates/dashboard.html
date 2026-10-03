@@ -3,24 +3,33 @@
 {% block title %}Dashboard - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Dashboard', sub = 'Upload counts come from your own records. Scores stay empty until the analysis engine is built.' %}
-  {% include "partials/page_header.html" %}
-{% endwith %}
+<section class="page-header">
+  <div class="container">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 fade-up">
+      <div>
+        <p class="eyebrow mb-2">Dashboard</p>
+        <h1 class="mb-2">Welcome back, {{ current_user['full_name'].split(' ')[0] }}</h1>
+        <p class="mb-0 text-muted-soft">Turn your resume into actionable career insights.</p>
+      </div>
+      <a class="btn btn-accent btn-lg" href="{{ url_for('analyze') }}">Analyze a Resume <span class="arrow">&rarr;</span></a>
+    </div>
+  </div>
+</section>
 
 <div class="container py-4">
-  <div class="row g-3">
+  <div class="row g-3 reveal">
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Total Analyses', value = analysis_count, hint = 'Stored analyses in your account' %}
+      {% with label = 'Total Resumes', value = resume_count, hint = 'Saved in your account' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Average Match Score', value = '--', hint = 'Available after analysis is implemented', placeholder = True %}
+      {% with label = 'Total Analyses', value = analysis_count, hint = 'Resume vs job comparisons' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Resumes Uploaded', value = resume_count, hint = 'Saved in the database' %}
+      {% with label = 'Average Match Score', value = '--', hint = 'Not yet calculated on the dashboard', placeholder = True %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
@@ -28,38 +37,54 @@
       {% with label = 'Latest Resume',
               value = latest_resume.original_filename if latest_resume else '--',
               hint = latest_resume.uploaded_at if latest_resume else 'Nothing uploaded yet',
-              placeholder = not latest_resume %}
+              placeholder = not latest_resume, text_value = True %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
   </div>
 
-  <div class="row g-3 mt-1">
+  <div class="row g-3 mt-1 reveal">
     <div class="col-lg-8">
       <div class="card h-100">
-        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Recent analyses</span>
-          <a class="btn btn-sm btn-outline-dark" href="{{ url_for('history') }}">View all</a>
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span>Recent activity</span>
+          <a class="btn btn-sm btn-ghost" href="{{ url_for('history') }}">View history</a>
         </div>
         <div class="card-body">
-          {% with title = 'No analyses yet',
-                  message = 'Upload a resume with a job description to create your first analysis.',
-                  action_url = url_for('analyze'),
-                  action_label = 'Upload Resume' %}
-            {% include "partials/empty_state.html" %}
-          {% endwith %}
+          {% if latest_resume %}
+            <div class="d-flex align-items-center justify-content-between gap-3 flex-wrap">
+              <div class="file-name-cell">
+                <span class="file-icon" aria-hidden="true">PDF</span>
+                <div>
+                  <div>{{ latest_resume.original_filename }}</div>
+                  <div class="small text-muted-soft fw-normal">Uploaded {{ latest_resume.uploaded_at }}</div>
+                </div>
+              </div>
+              <span class="badge badge-soft">Most recent upload</span>
+            </div>
+            <p class="small text-muted-soft mt-3 mb-0">
+              You have {{ analysis_count }} saved {{ 'analysis' if analysis_count == 1 else 'analyses' }}.
+              Open History to see every score.
+            </p>
+          {% else %}
+            {% with title = 'No activity yet',
+                    message = 'Upload a resume with a job description to create your first analysis.',
+                    action_url = url_for('analyze'),
+                    action_label = 'Analyze a Resume' %}
+              {% include "partials/empty_state.html" %}
+            {% endwith %}
+          {% endif %}
         </div>
       </div>
     </div>
 
     <div class="col-lg-4">
       <div class="card h-100">
-        <div class="card-header bg-transparent fw-semibold">Quick actions</div>
+        <div class="card-header">Quick actions</div>
         <div class="card-body d-grid gap-2">
-          <a class="btn btn-accent" href="{{ url_for('analyze') }}">Upload Resume</a>
-          <a class="btn btn-outline-dark" href="{{ url_for('analyze') }}">Analyze Job Description</a>
-          <a class="btn btn-outline-dark" href="{{ url_for('history') }}">Analysis History</a>
-          <a class="btn btn-outline-dark" href="{{ url_for('profile') }}">Edit Profile</a>
+          <a class="btn btn-accent" href="{{ url_for('analyze') }}">Upload &amp; analyze</a>
+          <a class="btn btn-ghost" href="{{ url_for('history') }}">Analysis history</a>
+          <a class="btn btn-ghost" href="{{ url_for('profile') }}">Your profile</a>
         </div>
       </div>
     </div>

@@ -1,89 +1,98 @@
 {% extends "base.html" %}
 
-{% block title %}Upload Resume - AI Resume Analyzer{% endblock %}
+{% block title %}Analyze Resume - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Resume Upload', sub = 'PDF only, up to 5 MB. Upload and validation are fully working.' %}
+{% with eyebrow = 'Analyze', heading = 'Match your resume to a job', sub = 'Upload a PDF resume and paste the job description. We compare them with TF-IDF, cosine similarity and skill matching.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
-<div class="container py-4">
-  <div class="row g-3">
-    <div class="col-lg-7">
-      <div class="card">
-        <div class="card-body p-4">
-          <form
-            id="upload-form"
-            action="{{ url_for('upload_resume') }}"
-            method="post"
-            enctype="multipart/form-data"
-            novalidate
-          >
+<div class="container py-3">
+  <form
+    id="upload-form"
+    action="{{ url_for('upload_resume') }}"
+    method="post"
+    enctype="multipart/form-data"
+    novalidate
+  >
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card fade-up delay-1">
+          <div class="card-body p-4">
             <div id="client-error" class="alert alert-danger d-none py-2 small" role="alert"></div>
 
-            <label class="form-label" for="resume">Resume file (PDF)</label>
-            <label class="dropzone w-100 mb-2" for="resume">
-              <span class="dropzone-icon">&#8679;</span>
-              <span class="fw-semibold d-block">Click to choose a PDF resume</span>
-              <span class="small text-muted-soft">Maximum size 5 MB</span>
-            </label>
+            <p class="eyebrow mb-2">Step 1</p>
+            <label class="form-label h5 d-block mb-3" for="resume">Resume (PDF)</label>
             <input
-              class="form-control visually-hidden"
+              class="visually-hidden"
               type="file"
               id="resume"
               name="resume"
               accept="application/pdf"
               required
             />
+            <label class="dropzone w-100 mb-3" for="resume" id="dropzone">
+              <span class="dropzone-icon" aria-hidden="true">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m6 10 6-6 6 6"/><path d="M4 20h16"/></svg>
+              </span>
+              <span class="dropzone-title">Drop your PDF here or click to browse</span>
+              <span class="small text-muted-soft">PDF only &middot; Maximum size 5 MB</span>
+            </label>
 
-            <div id="file-info" class="file-info d-none mb-3">
-              <span class="badge badge-soft me-2">Selected</span>
-              <span id="file-name" class="fw-semibold"></span>
-              <span id="file-size" class="small text-muted-soft ms-2"></span>
+            <div id="file-info" class="file-info d-none mb-2">
+              <span class="file-icon" aria-hidden="true">PDF</span>
+              <span id="file-name" class="fw-semibold text-break"></span>
+              <span id="file-size" class="small text-muted-soft ms-auto"></span>
             </div>
 
-            <div class="mb-3 mt-3">
-              <label class="form-label" for="job_description">Job description</label>
-              <textarea
-                class="form-control"
-                id="job_description"
-                name="job_description"
-                rows="8"
-                placeholder="Paste the job description here..."
-              ></textarea>
-              <div class="form-text">
-                Required for analysis. Your resume text is compared with this job
-                description to calculate the match score.
-              </div>
-            </div>
+            <hr class="my-4" />
 
-            <button class="btn btn-accent" type="submit" id="submit-btn">
-              <span class="spinner-border spinner-border-sm d-none me-2" id="submit-spinner"></span>
-              <span id="submit-label">Upload and continue</span>
-            </button>
-            <a class="btn btn-outline-dark" href="{{ url_for('dashboard') }}">Cancel</a>
-          </form>
+            <p class="eyebrow mb-2">Step 2</p>
+            <div class="d-flex justify-content-between align-items-end mb-2">
+              <label class="form-label h5 mb-0" for="job_description">Job description</label>
+              <span id="jd-count" class="char-count" aria-live="polite">0 characters</span>
+            </div>
+            <textarea
+              class="form-control"
+              id="job_description"
+              name="job_description"
+              rows="10"
+              placeholder="Paste the job description here..."
+            ></textarea>
+            <div class="form-text">Required for analysis. Paste the full posting for the most accurate comparison.</div>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+              <button class="btn btn-accent btn-lg" type="submit" id="submit-btn">
+                <span class="spinner-border spinner-border-sm d-none me-2" id="submit-spinner" aria-hidden="true"></span>
+                <span id="submit-label">Analyze Resume</span>
+              </button>
+              <a class="btn btn-ghost btn-lg" href="{{ url_for('dashboard') }}">Cancel</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="col-lg-5">
-      <div class="card h-100">
-        <div class="card-header bg-transparent fw-semibold">Before you upload</div>
-        <div class="card-body small">
-          <ul class="checklist mb-3">
-            <li>Use a text-based PDF, not a scanned image.</li>
-            <li>Keep the file under 5 MB.</li>
-            <li>Include a clear skills section.</li>
-            <li>Paste the full job description for better results later.</li>
-          </ul>
-          <div class="alert alert-info small mb-0">
-            At this milestone the page confirms a successful upload. It does not score
-            the resume yet.
+      <div class="col-lg-4">
+        <div class="card fade-up delay-2">
+          <div class="card-header">Before you upload</div>
+          <div class="card-body">
+            <ul class="req-list">
+              <li><span class="tick">&check;</span> Use a text-based PDF, not a scanned image.</li>
+              <li><span class="tick">&check;</span> Keep the file under 5 MB.</li>
+              <li><span class="tick">&check;</span> Include a clear skills section.</li>
+              <li><span class="tick">&check;</span> Paste the complete job description.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="card mt-3 fade-up delay-3">
+          <div class="card-header">How the score works</div>
+          <div class="card-body small text-muted-soft">
+            Final score = 50% text similarity (TF-IDF + cosine) + 50% skill match.
+            If the job lists no recognised skills, text similarity is used alone.
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </form>
 </div>
 {% endblock %}

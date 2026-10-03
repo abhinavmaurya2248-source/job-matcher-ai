@@ -3,80 +3,35 @@
 {% block title %}Profile - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-{% with heading = 'Profile', sub = 'Your account details. Editing is added in a later milestone.' %}
-  {% include "partials/page_header.html" %}
-{% endwith %}
+<div class="container pt-4 pb-3">
+  <section class="profile-hero d-flex flex-column flex-sm-row align-items-sm-center gap-4 fade-up">
+    <div class="avatar" aria-hidden="true">{{ current_user['full_name'][0]|upper }}</div>
+    <div class="flex-grow-1">
+      <p class="eyebrow mb-1">Profile</p>
+      <h1 class="h3 mb-1">{{ current_user['full_name'] }}</h1>
+      <p class="text-muted-soft mb-0 text-break">{{ current_user['email'] }}</p>
+    </div>
+    <a class="btn btn-ghost" href="{{ url_for('logout') }}">Logout</a>
+  </section>
 
-<div class="container py-4">
-  <div class="row g-3">
-    <div class="col-lg-4">
-      <div class="card text-center h-100">
-        <div class="card-body">
-          <div class="avatar mx-auto mb-3">{{ current_user['full_name'][0]|upper }}</div>
-          <h2 class="h6 mb-1">{{ current_user['full_name'] }}</h2>
-          <p class="small text-muted-soft mb-0">{{ current_user['email'] }}</p>
+  <div class="row g-3 mt-1 reveal">
+    <div class="col-lg-7">
+      <div class="card h-100">
+        <div class="card-header">Account information</div>
+        <div class="card-body py-2">
+          <div class="kv-row"><span class="k">Full name</span><span class="v">{{ current_user['full_name'] }}</span></div>
+          <div class="kv-row"><span class="k">Email</span><span class="v">{{ current_user['email'] }}</span></div>
+          <div class="kv-row"><span class="k">Member since</span><span class="v">{{ current_user['created_at'] }}</span></div>
         </div>
       </div>
     </div>
-
-    <div class="col-lg-8">
-      <div class="card mb-3">
-        <div class="card-header bg-transparent fw-semibold">Account information</div>
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-sm mb-0">
-              <tbody>
-                <tr><th class="w-50">Name</th><td>{{ current_user['full_name'] }}</td></tr>
-                <tr><th>Email</th><td>{{ current_user['email'] }}</td></tr>
-                <tr><th>Member since</th><td>{{ current_user['created_at'] }}</td></tr>
-                <tr><th>Total analyses</th><td class="text-muted-soft">--</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="card mb-3">
-        <div class="card-header bg-transparent fw-semibold">Edit profile</div>
-        <div class="card-body">
-          <form class="row g-3 needs-validation" novalidate onsubmit="return false;">
-            <div class="col-md-6">
-              <label class="form-label" for="profile-name">Full name</label>
-              <input class="form-control" type="text" id="profile-name" required />
-              <div class="invalid-feedback">Please enter your name.</div>
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="profile-email">Email</label>
-              <input class="form-control" type="email" id="profile-email" required />
-              <div class="invalid-feedback">Please enter a valid email address.</div>
-            </div>
-            <div class="col-12">
-              <button class="btn btn-accent" type="submit" disabled>Save changes</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header bg-transparent fw-semibold">Change password</div>
-        <div class="card-body">
-          <form class="row g-3 needs-validation" novalidate onsubmit="return false;">
-            <div class="col-md-4">
-              <label class="form-label" for="current-password">Current password</label>
-              <input class="form-control" type="password" id="current-password" required />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="new-password">New password</label>
-              <input class="form-control" type="password" id="new-password" minlength="6" required />
-            </div>
-            <div class="col-md-4">
-              <label class="form-label" for="repeat-password">Repeat new password</label>
-              <input class="form-control" type="password" id="repeat-password" required />
-            </div>
-            <div class="col-12">
-              <button class="btn btn-outline-dark" type="submit" disabled>Update password</button>
-            </div>
-          </form>
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header">Security</div>
+        <div class="card-body small text-muted-soft">
+          <p>Your password is stored only as a secure hash and is never shown in the app.</p>
+          <p class="mb-3">Profile editing and password change are not available yet.</p>
+          <span class="badge badge-placeholder">Coming later</span>
         </div>
       </div>
     </div>
