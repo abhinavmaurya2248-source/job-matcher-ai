@@ -3,41 +3,55 @@
 {% block title %}Register - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-5">
-      <div class="card auth-card">
-        <div class="card-body p-4">
-          <h1 class="h4 mb-1">Create account</h1>
-          <p class="small text-muted-soft">Your password is stored only as a secure hash.</p>
+<div class="container auth-wrap py-4">
+  <div class="row justify-content-center w-100 mx-0">
+    <div class="col-lg-10 col-xl-9 px-0">
+      <div class="auth-panel row g-0 fade-up">
+        <div class="col-md-5">
+          <div class="auth-side d-flex flex-column justify-content-between">
+            <div>
+              <p class="eyebrow mb-3">ResumeAI</p>
+              <h2 class="mb-3">Create your account in under a minute.</h2>
+              <p class="text-muted-soft small mb-0">Your resumes and analyses stay private to your account.</p>
+            </div>
+            <p class="small text-muted-soft mb-0 mt-4">AI-Based Resume Analyzer &middot; BCA Minor Project</p>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="auth-form">
+            <h1 class="h3 mb-1">Create account</h1>
+            <p class="small text-muted-soft mb-4">Your password is stored only as a secure hash.</p>
 
-          <form class="needs-validation" method="post" action="{{ url_for('register') }}" novalidate>
-            <div class="mb-3">
-              <label class="form-label" for="name">Full name</label>
-              <input class="form-control" type="text" id="name" name="name" value="{{ form_name or '' }}" required />
-              <div class="invalid-feedback">Please enter your name.</div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="reg-email">Email</label>
-              <input class="form-control" type="email" id="reg-email" name="email" value="{{ form_email or '' }}" required />
-              <div class="invalid-feedback">Please enter a valid email address.</div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="reg-password">Password</label>
-              <input class="form-control" type="password" id="reg-password" name="password" minlength="6" required />
-              <div class="invalid-feedback">Use at least 6 characters.</div>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="confirm-password">Confirm password</label>
-              <input class="form-control" type="password" id="confirm-password" name="confirm_password" required />
-              <div class="invalid-feedback">Please repeat the password.</div>
-            </div>
-            <button class="btn btn-accent w-100" type="submit">Register</button>
-          </form>
+            <form class="needs-validation" method="post" action="{{ url_for('register') }}" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="name">Full name</label>
+                <input class="form-control" type="text" id="name" name="name" value="{{ form_name or '' }}" autocomplete="name" required />
+                <div class="invalid-feedback">Please enter your name.</div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="reg-email">Email</label>
+                <input class="form-control" type="email" id="reg-email" name="email" value="{{ form_email or '' }}" autocomplete="email" required />
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+              </div>
+              <div class="row g-3 mb-4">
+                <div class="col-sm-6">
+                  <label class="form-label" for="reg-password">Password</label>
+                  <input class="form-control" type="password" id="reg-password" name="password" minlength="6" autocomplete="new-password" required />
+                  <div class="invalid-feedback">Use at least 6 characters.</div>
+                </div>
+                <div class="col-sm-6">
+                  <label class="form-label" for="confirm-password">Confirm password</label>
+                  <input class="form-control" type="password" id="confirm-password" name="confirm_password" autocomplete="new-password" required />
+                  <div class="invalid-feedback">Please repeat the password.</div>
+                </div>
+              </div>
+              <button class="btn btn-accent btn-lg w-100" type="submit">Register</button>
+            </form>
 
-          <p class="small mt-3 mb-0">
-            Already registered? <a href="{{ url_for('login') }}">Login</a>
-          </p>
+            <p class="small mt-4 mb-0 text-muted-soft">
+              Already registered? <a href="{{ url_for('login') }}">Login</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>

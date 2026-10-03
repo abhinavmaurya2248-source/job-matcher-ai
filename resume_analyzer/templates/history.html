@@ -2,21 +2,74 @@
 
 {% block title %}Analysis History - AI Resume Analyzer{% endblock %}
 
+{% macro score_pill(score) -%}
+  {% if score is not none %}
+    {% set cls = 'score-high' if score >= 70 else ('score-mid' if score >= 40 else 'score-low') %}
+    <span class="score-pill {{ cls }}"><span class="dot"></span>{{ score }}%</span>
+  {% else %}
+    <span class="score-pill score-none">--</span>
+  {% endif %}
+{%- endmacro %}
+
 {% block content %}
-{% with heading = 'Analysis History', sub = 'Your own resumes and analyses, read from the database.' %}
+{% with eyebrow = 'History', heading = 'Your analyses', sub = 'Every resume and analysis in your account, read from the database.' %}
   {% include "partials/page_header.html" %}
 {% endwith %}
 
-<div class="container py-4">
-  <div class="card mb-3">
-    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
-      <span class="fw-semibold">Uploaded resumes</span>
-      <a class="btn btn-sm btn-accent" href="{{ url_for('analyze') }}">Upload resume</a>
+<div class="container py-3">
+  <div class="card mb-4 reveal">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Analyses <span class="text-muted-soft fw-normal small ms-1">{{ analyses | length }}</span></span>
+      <a class="btn btn-sm btn-accent" href="{{ url_for('analyze') }}">New analysis</a>
+    </div>
+    <div class="card-body">
+      {% if analyses %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle table-stack">
+            <thead>
+              <tr>
+                <th>Resume</th><th>Job description</th><th>Match Score</th><th>Date</th>
+                <th class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for row in analyses %}
+                <tr>
+                  <td data-label="Resume">
+                    <span class="file-name-cell"><span class="file-icon" aria-hidden="true">PDF</span>{{ row.original_filename }}</span>
+                  </td>
+                  <td data-label="Job" class="small text-muted-soft">
+                    {{ (row.job_description or '') | truncate(70, true) or '--' }}
+                  </td>
+                  <td data-label="Match Score">{{ score_pill(row.match_score) }}</td>
+                  <td data-label="Date" class="date-cell">{{ (row.created_at or '')[:16] }}</td>
+                  <td data-label="Actions" class="text-end">
+                    <a class="btn btn-sm btn-ghost" href="{{ url_for('analysis_detail', analysis_id=row.id) }}">View <span class="arrow">&rarr;</span></a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        {% with title = 'No analyses yet',
+                message = 'Upload a resume with a job description to create your first analysis.',
+                action_url = url_for('analyze'),
+                action_label = 'Analyze a Resume' %}
+          {% include "partials/empty_state.html" %}
+        {% endwith %}
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card reveal">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Uploaded resumes <span class="text-muted-soft fw-normal small ms-1">{{ resumes | length }}</span></span>
     </div>
     <div class="card-body">
       {% if resumes %}
         <div class="table-responsive">
-          <table class="table align-middle">
+          <table class="table table-hover align-middle table-stack">
             <thead>
               <tr>
                 <th>Resume</th><th>Size</th><th>Text</th><th>Skills</th><th>Uploaded</th>
@@ -26,11 +79,11 @@
             <tbody>
               {% for row in resumes %}
                 <tr>
-                  <td>{{ row.original_filename }}</td>
-                  <td class="small text-muted-soft">
-                    {{ ((row.file_size or 0) / 1024) | round(2) }} KB
+                  <td data-label="Resume">
+                    <span class="file-name-cell"><span class="file-icon" aria-hidden="true">PDF</span>{{ row.original_filename }}</span>
                   </td>
-                  <td class="small">
+                  <td data-label="Size" class="small text-muted-soft">{{ ((row.file_size or 0) / 1024) | round(2) }} KB</td>
+                  <td data-label="Text" class="small">
                     {% if row.extraction_status == 'success' %}
                       <span class="badge text-bg-success">{{ row.char_count or 0 }} chars</span>
                     {% elif row.extraction_status %}
@@ -39,23 +92,17 @@
                       <span class="badge badge-soft">--</span>
                     {% endif %}
                   </td>
-                  <td class="small">
+                  <td data-label="Skills" class="small">
                     {% if row.extracted_skills %}
-                      <span class="badge badge-soft">
-                        {{ row.extracted_skills | from_json | length }} found
-                      </span>
+                      <span class="badge badge-soft">{{ row.extracted_skills | from_json | length }} found</span>
                     {% else %}
                       <span class="badge badge-soft">--</span>
                     {% endif %}
                   </td>
-                  <td class="small text-muted-soft">{{ row.uploaded_at }}</td>
-                  <td class="text-end">
-                    <form
-                      class="d-inline"
-                      method="post"
-                      action="{{ url_for('delete_resume', resume_id=row.id) }}"
-                      onsubmit="return confirm('Delete this resume?');"
-                    >
+                  <td data-label="Uploaded" class="date-cell">{{ (row.uploaded_at or '')[:16] }}</td>
+                  <td data-label="Actions" class="text-end">
+                    <form class="d-inline" method="post" action="{{ url_for('delete_resume', resume_id=row.id) }}"
+                          onsubmit="return confirm('Delete this resume?');">
                       <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                     </form>
                   </td>
@@ -67,54 +114,6 @@
       {% else %}
         {% with title = 'No resumes yet',
                 message = 'Upload a PDF resume and it will be saved to your account.',
-                action_url = url_for('analyze'),
-                action_label = 'Upload Resume' %}
-          {% include "partials/empty_state.html" %}
-        {% endwith %}
-      {% endif %}
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-header bg-transparent fw-semibold">Analyses</div>
-
-    <div class="card-body">
-      {% if analyses %}
-        <div class="table-responsive">
-          <table class="table align-middle">
-            <thead>
-              <tr>
-                <th>Resume</th><th>Job description</th><th>Match Score</th><th>Date</th>
-                <th class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for row in analyses %}
-                <tr>
-                  <td>{{ row.original_filename }}</td>
-                  <td class="small text-muted-soft">
-                    {{ (row.job_description or '') | truncate(70, true) or '--' }}
-                  </td>
-                  <td>
-                    <span class="badge {{ 'text-bg-success' if row.match_score is not none else 'badge-soft' }}">
-                      {{ (row.match_score ~ '%') if row.match_score is not none else '--' }}
-                    </span>
-                  </td>
-                  <td class="small text-muted-soft">{{ row.created_at }}</td>
-                  <td class="text-end">
-                    <a
-                      class="btn btn-sm btn-outline-dark"
-                      href="{{ url_for('analysis_detail', analysis_id=row.id) }}"
-                    >View</a>
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        {% with title = 'No analyses yet',
-                message = 'Analysis records are created once the matching engine is implemented. The database table is ready.',
                 action_url = url_for('analyze'),
                 action_label = 'Upload Resume' %}
           {% include "partials/empty_state.html" %}

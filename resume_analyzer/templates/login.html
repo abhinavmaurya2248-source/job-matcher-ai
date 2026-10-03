@@ -3,39 +3,44 @@
 {% block title %}Login - AI Resume Analyzer{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="row justify-content-center">
-    <div class="col-md-7 col-lg-5">
-      <div class="card auth-card">
-        <div class="card-body p-4">
-          <h1 class="h4 mb-1">Login</h1>
-          <p class="small text-muted-soft">Sign in with the email and password you registered with.</p>
-
-          <form class="needs-validation" method="post" action="{{ url_for('login') }}" novalidate>
-            <div class="mb-3">
-              <label class="form-label" for="email">Email</label>
-              <input
-                class="form-control"
-                type="email"
-                id="email"
-                name="email"
-                value="{{ form_email or '' }}"
-                placeholder="you@example.com"
-                required
-              />
-              <div class="invalid-feedback">Please enter a valid email address.</div>
+<div class="container auth-wrap py-4">
+  <div class="row justify-content-center w-100 mx-0">
+    <div class="col-lg-10 col-xl-9 px-0">
+      <div class="auth-panel row g-0 fade-up">
+        <div class="col-md-5">
+          <div class="auth-side d-flex flex-column justify-content-between">
+            <div>
+              <p class="eyebrow mb-3">ResumeAI</p>
+              <h2 class="mb-3">See how well your resume fits the job.</h2>
+              <p class="text-muted-soft small mb-0">TF-IDF text similarity and skill matching, computed locally.</p>
             </div>
-            <div class="mb-3">
-              <label class="form-label" for="password">Password</label>
-              <input class="form-control" type="password" id="password" name="password" required />
-              <div class="invalid-feedback">Please enter your password.</div>
-            </div>
-            <button class="btn btn-accent w-100" type="submit">Login</button>
-          </form>
+            <p class="small text-muted-soft mb-0 mt-4">AI-Based Resume Analyzer &middot; BCA Minor Project</p>
+          </div>
+        </div>
+        <div class="col-md-7">
+          <div class="auth-form">
+            <h1 class="h3 mb-1">Welcome back</h1>
+            <p class="small text-muted-soft mb-4">Sign in with the email and password you registered with.</p>
 
-          <p class="small mt-3 mb-0">
-            New here? <a href="{{ url_for('register') }}">Create an account</a>
-          </p>
+            <form class="needs-validation" method="post" action="{{ url_for('login') }}" novalidate>
+              <div class="mb-3">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-control" type="email" id="email" name="email"
+                       value="{{ form_email or '' }}" placeholder="you@example.com" autocomplete="email" required />
+                <div class="invalid-feedback">Please enter a valid email address.</div>
+              </div>
+              <div class="mb-4">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" type="password" id="password" name="password" autocomplete="current-password" required />
+                <div class="invalid-feedback">Please enter your password.</div>
+              </div>
+              <button class="btn btn-accent btn-lg w-100" type="submit">Login</button>
+            </form>
+
+            <p class="small mt-4 mb-0 text-muted-soft">
+              New here? <a href="{{ url_for('register') }}">Create an account</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
