@@ -10,9 +10,9 @@
 
 <div class="container pt-4 pb-2">
   <section class="result-hero text-center fade-up">
-    <p class="eyebrow mb-2">Resume Analysis</p>
+    <p class="eyebrow mb-2">Resume Match Analysis</p>
     <h1 class="h3 mb-2">
-      {% if mt and mt.status == 'success' %}Your resume has been analyzed against this job description.{% else %}Analysis result{% endif %}
+      {% if mt and mt.status == 'success' %}How closely your resume aligns with this role.{% else %}Resume Match Analysis{% endif %}
     </h1>
     {% if uploaded %}<p class="text-muted-soft small mb-4">{{ uploaded.original_name }}</p>{% else %}<div class="mb-4"></div>{% endif %}
 
@@ -23,8 +23,8 @@
       <svg viewBox="0 0 200 200" aria-hidden="true">
         <defs>
           <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stop-color="#5eead4" />
-            <stop offset="100%" stop-color="#60a5fa" />
+            <stop offset="0%" stop-color="#22d3ee" />
+            <stop offset="100%" stop-color="#8b5cf6" />
           </linearGradient>
         </defs>
         <circle class="track" cx="100" cy="100" r="90" fill="none" stroke-width="10" />
@@ -127,7 +127,7 @@
               <span class="skill-chip is-missing chip-in" style="animation-delay: {{ loop.index0 * 40 }}ms">{{ name }}</span>
             {% endfor %}
           {% elif mt and mt.status == 'success' %}
-            <p class="mb-0 small text-muted-soft">The resume covers every recognised skill named in this job description.</p>
+            <p class="mb-0 small text-muted-soft">All recognised job skills are covered.</p>
           {% else %}
             {% with title = 'No missing skills yet', message = 'Run an analysis with a job description to see gaps.' %}
               {% include "partials/empty_state.html" %}

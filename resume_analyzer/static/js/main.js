@@ -162,7 +162,7 @@
 
     // Loading state only - no fake progress; the server does the real work.
     spinner.classList.remove("d-none");
-    label.textContent = "Analyzing...";
+    label.textContent = "Analyzing your resume"; label.classList.add("btn-loading-dots");
     button.setAttribute("disabled", "disabled");
     setTimeout(function () { button.removeAttribute("disabled"); }, 15000);
   });

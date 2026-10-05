@@ -1,50 +1,72 @@
 {% extends "base.html" %}
 
-{% block title %}AI-Based Resume Analyzer and Job Matching System{% endblock %}
+{% block title %}ResumeAI - AI-Based Resume Analyzer and Job Matching System{% endblock %}
 
 {% block content %}
-<section class="hero">
+<section class="cine-hero">
+  <span class="glow glow-a" aria-hidden="true"></span>
+  <span class="glow glow-b" aria-hidden="true"></span>
+  <span class="hair" style="top: 22%;" aria-hidden="true"></span>
   <div class="container">
-    <div class="row align-items-center gy-4">
+    <div class="row align-items-center gy-5">
       <div class="col-lg-6">
-        <span class="badge badge-soft mb-3">BCA Minor Project</span>
-        <h1 class="display-6 fw-bold mb-3">
-          AI-Based Resume Analyzer and Job Matching System
-        </h1>
-        <p class="lead mb-4">
-          Upload your resume as a PDF, paste a job description, and see how well the
-          two match - based on real text similarity and skill comparison.
+        <p class="eyebrow mb-4 fade-up">AI-Powered Career Intelligence</p>
+        <h1 class="hero-title fade-up delay-1">Your Resume.<br /><span class="text-gradient">Matched Smarter.</span></h1>
+        <p class="hero-lead mb-4 fade-up delay-2">
+          Analyze your resume against real job requirements using NLP, text similarity and skill intelligence.
         </p>
-        <div class="d-flex flex-wrap gap-2">
-          <a class="btn btn-accent btn-lg px-4" href="{{ url_for('analyze') }}">Upload Resume</a>
-          <a class="btn btn-outline-dark btn-lg px-4" href="{{ url_for('dashboard') }}">View Dashboard</a>
+        <div class="d-flex flex-wrap gap-2 fade-up delay-3">
+          <a class="btn btn-accent btn-lg" href="{{ url_for('analyze') }}">Analyze My Resume <span class="arrow">&rarr;</span></a>
+          <a class="btn btn-ghost btn-lg" href="{{ url_for('dashboard') }}">Explore Dashboard</a>
         </div>
-        <p class="small text-muted-soft mt-3 mb-0">
-          Current build: resume upload and validation are working. Analysis features
-          are added in the next milestones.
-        </p>
+        <ul class="hero-points fade-up delay-3">
+          <li>PDF text extraction</li>
+          <li>NLP skill detection</li>
+          <li>TF-IDF + cosine similarity</li>
+        </ul>
       </div>
+
       <div class="col-lg-6">
-        <div class="card hero-card">
-          <div class="card-body">
-            <p class="stat-label mb-3">Sample result layout</p>
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small mb-1">
-                <span>Match Score</span><span class="text-muted-soft">awaiting analysis</span>
-              </div>
-              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+        <div class="position-relative mx-auto fade-up delay-2" style="max-width: 500px;">
+          <div class="float-chip float-a" aria-hidden="true"><span class="k">Engine</span> TF-IDF &middot; cosine</div>
+          <div class="float-chip float-b" aria-hidden="true"><span class="k">Runs</span> 100% locally</div>
+
+          <div class="intel-panel" role="img" aria-label="Illustrative preview of a ResumeAI analysis. Not real user data.">
+            <div class="intel-head">
+              <span class="stat-label">Resume Intelligence</span>
+              <span class="preview-tag">Illustrative preview</span>
             </div>
-            <div class="mb-3">
-              <div class="d-flex justify-content-between small mb-1">
-                <span>Text Similarity</span><span class="text-muted-soft">awaiting analysis</span>
+            <div class="intel-body">
+              {% set circ = 565.49 %}
+              <div class="score-ring" style="--circ: {{ circ }}; --offset: {{ circ * 0.28 }};">
+                <svg viewBox="0 0 200 200" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="scoreGradient" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stop-color="#22d3ee" />
+                      <stop offset="100%" stop-color="#8b5cf6" />
+                    </linearGradient>
+                  </defs>
+                  <circle class="track" cx="100" cy="100" r="90" fill="none" stroke-width="12" />
+                  <circle class="bar" cx="100" cy="100" r="90" fill="none" stroke-width="12" />
+                </svg>
+                <div class="score-ring-label">
+                  <span class="score-number">72%</span>
+                  <span class="score-caption">Sample</span>
+                </div>
               </div>
-              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+              <div>
+                <div class="intel-row"><span>Text Similarity</span><strong>44%</strong></div>
+                <div class="progress mb-3"><div class="progress-bar js-animate-bar" style="width: 44%"></div></div>
+                <div class="intel-row"><span>Skill Match</span><strong>100%</strong></div>
+                <div class="progress"><div class="progress-bar js-animate-bar" style="width: 100%"></div></div>
+              </div>
             </div>
-            <div>
-              <div class="d-flex justify-content-between small mb-1">
-                <span>Skill Match</span><span class="text-muted-soft">awaiting analysis</span>
-              </div>
-              <div class="progress"><div class="progress-bar bg-secondary" style="width: 0%"></div></div>
+            <div class="intel-foot">
+              <p class="stat-label mb-2">Matched skills</p>
+              {% for s in ['Python', 'Flask', 'SQL', 'Git', 'HTML', 'CSS'] %}
+                <span class="skill-chip is-match chip-in" style="animation-delay: {{ 400 + loop.index0 * 60 }}ms">{{ s }}</span>
+              {% endfor %}
+              <p class="small text-muted-soft mb-0 mt-1">Sample values for illustration. Your real score is calculated from your own resume.</p>
             </div>
           </div>
         </div>
@@ -53,48 +75,56 @@
   </div>
 </section>
 
-<section class="container py-5">
-  <h2 class="h4 mb-4">Key features</h2>
-  <div class="row g-3">
-    {% set features = [
-      ('PDF resume upload', 'Secure upload with type and size validation, and unique stored file names.'),
-      ('Text extraction', 'Resume text is read directly from the PDF for processing.'),
-      ('Keyword and skill detection', 'Skills found in the resume are compared with the job requirements.'),
-      ('Match score', 'A score based on text similarity and skill overlap, not hardcoded values.'),
-      ('Missing skills', 'See which required skills the resume does not mention yet.'),
-      ('Analysis history', 'Keep past analyses so you can compare different resumes and jobs.')
-    ] %}
-    {% for name, text in features %}
-      <div class="col-md-6 col-lg-4">
-        <div class="card feature-card h-100">
-          <div class="card-body">
-            <h3 class="h6">{{ name }}</h3>
-            <p class="small text-muted-soft mb-0">{{ text }}</p>
-          </div>
-        </div>
+<section class="cine-section">
+  <div class="container">
+    <div class="row mb-5 reveal">
+      <div class="col-lg-7">
+        <p class="eyebrow mb-3">How it helps</p>
+        <h2 class="section-title mb-3">From Resume<br />to Opportunity.</h2>
+        <p class="section-lead mb-0">Understand what your resume communicates and how closely it matches the role you're targeting.</p>
       </div>
-    {% endfor %}
+    </div>
+    <div class="feature-rail reveal">
+      <div class="feature-block">
+        <div class="feature-num">01</div>
+        <p class="feature-kicker">Upload</p>
+        <p>Start with your existing resume. PDF only, up to 5 MB.</p>
+      </div>
+      <div class="feature-block">
+        <div class="feature-num">02</div>
+        <p class="feature-kicker">Understand</p>
+        <p>Extract skills and meaningful resume text using NLP.</p>
+      </div>
+      <div class="feature-block">
+        <div class="feature-num">03</div>
+        <p class="feature-kicker">Match</p>
+        <p>Compare your profile against real job requirements.</p>
+      </div>
+    </div>
   </div>
 </section>
 
-<section class="section-alt py-5">
+<section class="cine-section">
   <div class="container">
-    <h2 class="h4 mb-4">How it works</h2>
-    <div class="row g-3 workflow">
+    <div class="text-lg-center mb-5 reveal">
+      <p class="eyebrow mb-3">The pipeline</p>
+      <h2 class="section-title mb-3">What happens to your resume.</h2>
+      <p class="section-lead mx-lg-auto mb-0">Every step runs locally in Python. No external AI services.</p>
+    </div>
+    <div class="pipeline mx-auto">
       {% set steps = [
-        ('1', 'Upload resume', 'Choose a PDF file up to 5 MB.'),
-        ('2', 'Add job description', 'Paste the job description you want to target.'),
-        ('3', 'Automatic analysis', 'Text is cleaned and compared using NLP techniques.'),
-        ('4', 'Get your result', 'Match score, matched skills and missing skills.')
+        ('Resume', 'Your PDF is validated and stored privately.'),
+        ('Text Extraction', 'PyMuPDF reads the text from every page.'),
+        ('Skill Intelligence', 'NLTK cleaning and a skill dictionary detect technical skills.'),
+        ('Job Matching', 'TF-IDF vectors are compared with cosine similarity.'),
+        ('Match Score', '50% text similarity + 50% skill match.')
       ] %}
-      {% for num, name, text in steps %}
-        <div class="col-sm-6 col-lg-3">
-          <div class="card step-card h-100">
-            <div class="card-body">
-              <span class="step-number">{{ num }}</span>
-              <h3 class="h6 mt-3">{{ name }}</h3>
-              <p class="small text-muted-soft mb-0">{{ text }}</p>
-            </div>
+      {% for title, desc in steps %}
+        <div class="pipe-step reveal">
+          <div class="pipe-node">{{ '%02d' % loop.index }}</div>
+          <div>
+            <p class="pipe-title">{{ title }}</p>
+            <p class="pipe-desc">{{ desc }}</p>
           </div>
         </div>
       {% endfor %}
@@ -102,14 +132,30 @@
   </div>
 </section>
 
-<section class="container py-5">
-  <div class="card cta-card">
-    <div class="card-body d-md-flex align-items-center justify-content-between gap-3">
-      <div>
-        <h2 class="h5 mb-1">Ready to check your resume?</h2>
-        <p class="small text-muted-soft mb-0">Start with a PDF upload - it takes a few seconds.</p>
+<section class="cine-section">
+  <div class="container">
+    <div class="row gy-4 align-items-center reveal">
+      <div class="col-lg-5">
+        <p class="eyebrow mb-3">Built with</p>
+        <h2 class="section-title mb-0" style="font-size: clamp(1.8rem, 3.4vw, 2.6rem);">A transparent, local AI stack.</h2>
       </div>
-      <a class="btn btn-accent mt-3 mt-md-0" href="{{ url_for('analyze') }}">Start now</a>
+      <div class="col-lg-7">
+        <div class="tech-row">
+          {% for name, role in [('Python', 'language'), ('Flask', 'web'), ('PyMuPDF', 'PDF text'), ('NLTK', 'stop words'), ('scikit-learn', 'TF-IDF'), ('SQLite', 'storage'), ('Bootstrap', 'UI')] %}
+            <span class="tech-badge">{{ name }}<small>{{ role }}</small></span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="pb-5">
+  <div class="container">
+    <div class="cta-band reveal">
+      <h2 class="section-title mb-3">Ready to understand<br />your resume?</h2>
+      <p class="section-lead mx-auto mb-4">Upload your resume and compare it with the role you want.</p>
+      <a class="btn btn-accent btn-lg" href="{{ url_for('analyze') }}">Analyze My Resume <span class="arrow">&rarr;</span></a>
     </div>
   </div>
 </section>
