@@ -26,7 +26,7 @@ import db
 import extractor
 from auth import current_user, login_required
 from config import Config
-from nlp import matcher, skill_extractor, text_processor
+from nlp import ats_scorer, matcher, skill_extractor, text_processor
 
 
 def create_app() -> Flask:
@@ -88,6 +88,32 @@ def empty_match(message=None, status="skipped") -> dict:
     }
 
 
+def safe_ats(resume_text: str, job_description: str, analysis: dict):
+    """Milestone 8 ATS-style score; returns None instead of raising."""
+    try:
+        return ats_scorer.calculate(resume_text, job_description, analysis)
+    except Exception:
+        return None
+
+
+def ats_for_saved(record, user_id: int):
+    """ATS data for a saved analysis, recomputed from the owner's stored
+    resume text and job description (deterministic, nothing stored or
+    invented). Returns None when the data needed is unavailable."""
+    try:
+        resume = db.find_resume(record["resume_id"], user_id)
+    except sqlite3.Error:
+        return None
+    if resume is None or not (resume["extracted_text"] or "").strip():
+        return None
+    job_description = record["job_description"] or ""
+    try:
+        analysis = matcher.analyze(resume["extracted_text"], job_description)
+    except Exception:
+        return None
+    return safe_ats(resume["extracted_text"], job_description, analysis)
+
+
 def run_matching(resume_id, user_id: int, job_description: str) -> dict:
     """Milestone 7: compare one of the user's own resumes with a job
     description, then store the analysis.
@@ -128,6 +154,7 @@ def run_matching(resume_id, user_id: int, job_description: str) -> dict:
     result.update(analysis)
     result["status"] = "success"
     result["message"] = None
+    result["ats"] = safe_ats(resume_text, job_description, analysis)
 
     try:
         result["analysis_id"] = db.create_analysis(
@@ -301,6 +328,8 @@ def register_routes(app: Flask) -> None:
             missing_skills=from_json_list(record["missing_skills"]),
             analysis_id=record["id"],
         )
+        # M8: ATS view recomputed deterministically from stored texts.
+        match["ats"] = ats_for_saved(record, user["id"])
 
         return render_template(
             "result.html",
@@ -328,7 +357,15 @@ def register_routes(app: Flask) -> None:
             flash("Could not read your history. Please try again.", "error")
             analyses, resumes = [], []
 
-        return render_template("history.html", analyses=analyses, resumes=resumes)
+        # M8: ATS score recomputed from the stored texts (no schema change).
+        ats_scores = {}
+        for row in analyses:
+            ats = ats_for_saved(row, user["id"])
+            ats_scores[row["id"]] = ats["score"] if ats else None
+
+        return render_template(
+            "history.html", analyses=analyses, resumes=resumes, ats_scores=ats_scores
+        )
 
     @app.route("/resumes/<int:resume_id>/delete", methods=["POST"])
     @login_required
