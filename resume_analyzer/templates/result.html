@@ -75,6 +75,63 @@
 </div>
 
 <div class="container py-3">
+  {% set ats = mt.ats if mt and mt.ats else None %}
+  {% if mt and mt.status == 'success' %}
+    <section class="card mb-3 reveal" aria-labelledby="ats-title">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span id="ats-title">ATS-style resume score</span>
+        {% if ats %}<span class="preview-tag">{{ ats.status }}</span>{% endif %}
+      </div>
+      <div class="card-body">
+        {% if ats %}
+          <div class="row g-4 align-items-center">
+            <div class="col-md-4 text-center">
+              <p class="stat-label mb-1">ATS Score</p>
+              <p class="mb-1"><span class="score-number text-gradient">{{ ats.score }}</span><span class="text-muted-soft"> / 100</span></p>
+              <p class="eyebrow mb-0">{{ ats.status }}</p>
+            </div>
+            <div class="col-md-8">
+              {% set parts = [
+                ('Skill Match', ats.skill_percent, '40%',
+                 (ats.matched_skill_count ~ ' of ' ~ ats.job_skill_count ~ ' recognised job skills found in your resume.') if ats.skill_percent is not none
+                 else 'No recognised skills in this job description, so its weight is shared by the other two parts.'),
+                ('Keyword Relevance', ats.keyword_percent, '35%',
+                 ats.keyword_matched_count ~ ' of ' ~ ats.job_keyword_count ~ ' meaningful job keywords also appear in your resume.'),
+                ('Text Similarity', ats.similarity_percent, '25%',
+                 'TF-IDF cosine similarity between the whole resume and job description.')
+              ] %}
+              {% for label, value, weight, note in parts %}
+                <div class="mb-3">
+                  <div class="d-flex justify-content-between small mb-1">
+                    <span class="fw-semibold">{{ label }} <span class="text-muted-soft fw-normal">&middot; weight {{ weight }}</span></span>
+                    <span>{{ (value ~ '%') if value is not none else 'N/A' }}</span>
+                  </div>
+                  <div class="progress" role="progressbar" aria-label="{{ label }}" aria-valuenow="{{ value or 0 }}" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar js-animate-bar {{ '' if value is not none else 'bg-secondary' }}" style="width: {{ value or 0 }}%"></div>
+                  </div>
+                  <p class="small text-muted-soft mb-0 mt-1">{{ note }}</p>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+          <hr />
+          <p class="stat-label mb-2">Relevant keywords</p>
+          {% if ats.keywords %}
+            {% for k in ats.keywords %}<span class="skill-chip">{{ k }}</span>{% endfor %}
+          {% else %}
+            <p class="small text-muted-soft">No meaningful keywords overlap between the resume and this job description.</p>
+          {% endif %}
+          <p class="small text-muted-soft mb-0 mt-2">
+            Your ATS-style score reflects how closely your resume matches the skills, keywords and text
+            patterns in this job description. It is an estimate, not the scoring of any real ATS software,
+            and not a guarantee of selection.
+          </p>
+        {% else %}
+          <p class="small text-muted-soft mb-0">The ATS-style score is unavailable for this analysis because the stored resume text could not be compared.</p>
+        {% endif %}
+      </div>
+    </section>
+  {% endif %}
   {% if saved is defined and saved %}
     <div class="alert alert-info">
       Saved analysis of <strong>{{ saved.original_filename }}</strong> from {{ saved.created_at }}.

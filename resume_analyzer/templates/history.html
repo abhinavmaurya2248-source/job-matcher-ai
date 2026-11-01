@@ -28,7 +28,7 @@
           <table class="table table-hover align-middle table-stack">
             <thead>
               <tr>
-                <th>Resume</th><th>Job description</th><th>Match Score</th><th>Date</th>
+                <th>Resume</th><th>Job description</th><th>ATS Score</th><th>Match Score</th><th>Date</th>
                 <th class="text-end">Actions</th>
               </tr>
             </thead>
@@ -41,6 +41,7 @@
                   <td data-label="Job" class="small text-muted-soft">
                     {{ (row.job_description or '') | truncate(70, true) or '--' }}
                   </td>
+                  <td data-label="ATS Score">{% set a = ats_scores.get(row.id) if ats_scores is defined else none %}{% if a is not none %}<span class="score-pill score-none">{{ a }} / 100</span>{% else %}<span class="score-pill score-none">N/A</span>{% endif %}</td>
                   <td data-label="Match Score">{{ score_pill(row.match_score) }}</td>
                   <td data-label="Date" class="date-cell">{{ (row.created_at or '')[:16] }}</td>
                   <td data-label="Actions" class="text-end">
