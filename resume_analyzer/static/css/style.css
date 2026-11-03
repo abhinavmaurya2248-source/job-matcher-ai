@@ -553,8 +553,17 @@ a { color: var(--accent); }
   border-radius: 14px;
   background:
     radial-gradient(600px 260px at 50% 0%, rgba(34, 211, 238, 0.1), transparent 70%),
+    radial-gradient(500px 240px at 100% 100%, rgba(236, 72, 153, 0.07), transparent 70%),
+    radial-gradient(420px 220px at 0% 100%, rgba(251, 146, 60, 0.05), transparent 70%),
     linear-gradient(180deg, var(--surface), var(--bg-elev));
   overflow: hidden;
+}
+.result-hero::after {
+  content: "";
+  position: absolute; inset: 0; border-radius: 14px; pointer-events: none;
+  background: linear-gradient(140deg, rgba(34, 211, 238, 0.35), transparent 30%, transparent 70%, rgba(236, 72, 153, 0.3));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; padding: 1px;
 }
 .score-ring { position: relative; width: 210px; height: 210px; margin: 0 auto; }
 .score-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
@@ -597,10 +606,13 @@ a { color: var(--accent); }
   overflow: hidden;
 }
 .progress-bar {
-  background: linear-gradient(90deg, var(--accent-strong), #8b5cf6);
+  background: var(--grad-primary);
   border-radius: 6px;
   transition: width 1.2s var(--ease);
 }
+.progress-bar.is-violet-pink { background: var(--grad-violet-pink); }
+.progress-bar.is-orange-pink { background: var(--grad-orange-pink); }
+.progress-bar.is-candy { background: var(--grad-candy); }
 .progress-bar.bg-secondary { background: rgba(255, 255, 255, 0.12); }
 .js-animate-bar { width: 0 !important; }
 .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); }
@@ -630,8 +642,8 @@ pre { color: var(--muted); }
   width: 76px;
   height: 76px;
   border-radius: 16px;
-  background: linear-gradient(135deg, var(--accent), #8b5cf6);
-  color: var(--accent-ink);
+  background: var(--grad-candy);
+  color: #04121a;
   display: grid;
   place-items: center;
   font-family: var(--font-head);
@@ -659,6 +671,7 @@ pre { color: var(--muted); }
   background:
     radial-gradient(500px 300px at 0% 100%, rgba(34, 211, 238, 0.14), transparent 70%),
     radial-gradient(400px 300px at 100% 0%, rgba(139, 92, 246, 0.1), transparent 70%),
+    radial-gradient(340px 260px at 100% 100%, rgba(236, 72, 153, 0.08), transparent 70%),
     var(--surface);
   border-right: 1px solid var(--line);
 }
