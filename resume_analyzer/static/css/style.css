@@ -726,7 +726,7 @@ pre { color: var(--muted); }
 /* =====================================================================
    Cinematic redesign layer: atmosphere, home sections, pipeline, CTA
    ===================================================================== */
-:root { --violet: #8b5cf6; --violet-soft: rgba(139, 92, 246, 0.12); }
+:root { --violet-soft: rgba(139, 92, 246, 0.12); --pink-soft: rgba(236, 72, 153, 0.12); --orange-soft: rgba(251, 146, 60, 0.12); }
 
 /* Atmospheric grid behind every page */
 body::before {
@@ -744,15 +744,14 @@ body::before {
 }
 
 .text-gradient {
-  background: linear-gradient(100deg, #22d3ee 0%, #67e8f9 40%, #a78bfa 100%);
+  background: var(--grad-candy);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-.brand-mark { box-shadow: 0 0 18px rgba(34, 211, 238, 0.35); }
+.brand-mark { box-shadow: 0 0 18px rgba(59, 130, 246, 0.4); }
 .app-navbar .navbar-brand { font-size: 1.15rem; }
 .app-navbar .nav-link.active::after { box-shadow: 0 0 10px rgba(34, 211, 238, 0.8); }
-.btn-accent:hover, .btn-accent:focus { box-shadow: 0 10px 30px -8px rgba(34, 211, 238, 0.65); }
 a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link) {
   text-decoration: none;
   background-image: linear-gradient(currentColor, currentColor);
@@ -779,9 +778,10 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 }
 .cine-hero .glow-a { width: 520px; height: 520px; top: -160px; right: -120px; background: rgba(34, 211, 238, 0.16); }
 .cine-hero .glow-b { width: 420px; height: 420px; bottom: -200px; left: -140px; background: rgba(139, 92, 246, 0.14); }
+.cine-hero .glow-c { width: 380px; height: 380px; top: 20%; left: 34%; background: rgba(236, 72, 153, 0.09); }
 .cine-hero .hair {
   position: absolute; left: 0; right: 0; height: 1px; z-index: -1;
-  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.35), transparent);
+  background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.35), rgba(236, 72, 153, 0.25), transparent);
 }
 .hero-title {
   font-size: clamp(2.6rem, 6.4vw, 5rem);
@@ -809,7 +809,7 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 .intel-panel::after {
   content: "";
   position: absolute; inset: -1px; border-radius: 14px; pointer-events: none;
-  background: linear-gradient(140deg, rgba(34, 211, 238, 0.45), transparent 35%, transparent 65%, rgba(139, 92, 246, 0.4));
+  background: linear-gradient(140deg, rgba(34, 211, 238, 0.45), rgba(59, 130, 246, 0.25) 30%, transparent 50%, transparent 65%, rgba(139, 92, 246, 0.4) 85%, rgba(236, 72, 153, 0.45));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor; mask-composite: exclude; padding: 1px;
 }
@@ -871,8 +871,8 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 /* pipeline */
 .pipeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding-top: 10px; }
 .pipeline::before {
-  content: ""; position: absolute; top: 33px; left: 10%; right: 10%; height: 1px;
-  background: linear-gradient(90deg, rgba(34, 211, 238, 0.6), rgba(139, 92, 246, 0.6));
+  content: ""; position: absolute; top: 33px; left: 10%; right: 10%; height: 2px;
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.6), rgba(59, 130, 246, 0.6) 30%, rgba(139, 92, 246, 0.6) 60%, rgba(236, 72, 153, 0.6));
 }
 .pipe-step { position: relative; text-align: center; }
 .pipe-node {
@@ -882,7 +882,14 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
   font-family: var(--font-head); font-weight: 600; font-size: 0.9rem;
   box-shadow: 0 0 0 6px var(--bg), 0 0 24px -4px rgba(34, 211, 238, 0.5);
 }
-.pipe-step:last-child .pipe-node { background: var(--accent); color: var(--accent-ink); }
+.pipeline .pipe-step:nth-child(2) .pipe-node { border-color: rgba(59, 130, 246, 0.45); color: #93c5fd; box-shadow: 0 0 0 6px var(--bg), 0 0 24px -4px rgba(59, 130, 246, 0.5); }
+.pipeline .pipe-step:nth-child(3) .pipe-node { border-color: rgba(139, 92, 246, 0.45); color: #c4b5fd; box-shadow: 0 0 0 6px var(--bg), 0 0 24px -4px rgba(139, 92, 246, 0.5); }
+.pipeline .pipe-step:nth-child(4) .pipe-node { border-color: rgba(236, 72, 153, 0.45); color: #f9a8d4; box-shadow: 0 0 0 6px var(--bg), 0 0 24px -4px rgba(236, 72, 153, 0.5); }
+.pipeline .pipe-step:nth-child(5) .pipe-node { border-color: rgba(251, 146, 60, 0.45); color: #fdba74; box-shadow: 0 0 0 6px var(--bg), 0 0 24px -4px rgba(251, 146, 60, 0.5); }
+.pipe-step:last-child .pipe-node {
+  background: var(--grad-orange-pink); border-color: rgba(251, 146, 60, 0.6);
+  color: #1c0a12; box-shadow: 0 0 0 6px var(--bg), 0 0 26px -4px rgba(236, 72, 153, 0.55);
+}
 .pipe-title { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
 .pipe-desc { font-size: 0.84rem; color: var(--muted); margin: 0 auto; max-width: 190px; }
 .pipeline .reveal:nth-child(2) { transition-delay: 0.08s; }
@@ -908,6 +915,8 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
   background:
     radial-gradient(600px 260px at 50% 120%, rgba(34, 211, 238, 0.22), transparent 70%),
     radial-gradient(500px 240px at 90% -20%, rgba(139, 92, 246, 0.18), transparent 70%),
+    radial-gradient(420px 220px at 8% 0%, rgba(236, 72, 153, 0.12), transparent 70%),
+    radial-gradient(360px 200px at 100% 100%, rgba(251, 146, 60, 0.1), transparent 70%),
     var(--bg-elev);
 }
 
@@ -924,8 +933,9 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 
 /* skill check prefix */
 .skill-chip.is-match::before { content: "\2713"; width: auto; height: auto; background: none; color: var(--accent); font-size: 0.8rem; }
-.skill-chip.is-missing::before { content: "+"; width: auto; height: auto; background: none; color: #c4b5fd; }
-.skill-chip.is-missing { border-color: rgba(139, 92, 246, 0.35); background: var(--violet-soft); color: #ddd6fe; border-style: dashed; }
+.skill-chip.is-missing::before { content: "+"; width: auto; height: auto; background: none; color: var(--orange); font-size: 0.8rem; }
+.skill-chip.is-missing { border-color: rgba(236, 72, 153, 0.38); background: var(--pink-soft); color: #fbcfe8; border-style: dashed; }
+.skill-chip.is-missing:hover { border-color: rgba(236, 72, 153, 0.6); }
 
 @media (max-width: 991.98px) {
   .pipeline { grid-template-columns: 1fr; gap: 0; max-width: 420px; }
