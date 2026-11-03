@@ -945,7 +945,7 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 
 @media (max-width: 991.98px) {
   .pipeline { grid-template-columns: 1fr; gap: 0; max-width: 420px; }
-  .pipeline::before { top: 24px; bottom: 24px; left: 23px; right: auto; width: 1px; height: auto; background: linear-gradient(180deg, rgba(34, 211, 238, 0.6), rgba(139, 92, 246, 0.6)); }
+  .pipeline::before { top: 24px; bottom: 24px; left: 23px; right: auto; width: 2px; height: auto; background: linear-gradient(180deg, rgba(34, 211, 238, 0.6), rgba(59, 130, 246, 0.6) 30%, rgba(139, 92, 246, 0.6) 60%, rgba(236, 72, 153, 0.6)); }
   .pipe-step { display: grid; grid-template-columns: 48px 1fr; gap: 18px; text-align: left; padding-bottom: 26px; }
   .pipe-node { margin: 0; }
   .pipe-desc { margin: 0; max-width: none; }
