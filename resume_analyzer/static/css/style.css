@@ -867,6 +867,12 @@ a:not(.btn):not(.nav-link):not(.navbar-brand):not(.jd-toggle):not(.footer-link):
 .feature-block:hover .feature-num { -webkit-text-stroke-color: var(--accent); }
 .feature-kicker { font-size: 0.74rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 700; margin: 22px 0 8px; }
 .feature-block p { color: var(--muted); margin: 0; max-width: 300px; }
+.feature-rail .feature-block:nth-child(2)::before { background: linear-gradient(90deg, var(--violet), var(--pink)); }
+.feature-rail .feature-block:nth-child(2):hover .feature-num { -webkit-text-stroke-color: var(--violet); }
+.feature-rail .feature-block:nth-child(2) .feature-kicker { color: #c4b5fd; }
+.feature-rail .feature-block:nth-child(3)::before { background: linear-gradient(90deg, var(--pink), var(--orange)); }
+.feature-rail .feature-block:nth-child(3):hover .feature-num { -webkit-text-stroke-color: var(--pink); }
+.feature-rail .feature-block:nth-child(3) .feature-kicker { color: #f9a8d4; }
 
 /* pipeline */
 .pipeline { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; padding-top: 10px; }
