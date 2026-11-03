@@ -24,12 +24,12 @@
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Total Analyses', value = analysis_count, hint = 'Resume vs job comparisons' %}
+      {% with label = 'Total Analyses', value = analysis_count, hint = 'Resume vs job comparisons', accent = 'violet' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
     <div class="col-sm-6 col-xl-3">
-      {% with label = 'Average Match Score', value = '--', hint = 'Not yet calculated on the dashboard', placeholder = True %}
+      {% with label = 'Average Match Score', value = '--', hint = 'Not yet calculated on the dashboard', placeholder = True, accent = 'pink' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
@@ -37,7 +37,7 @@
       {% with label = 'Latest Resume',
               value = latest_resume.original_filename if latest_resume else '--',
               hint = latest_resume.uploaded_at if latest_resume else 'Nothing uploaded yet',
-              placeholder = not latest_resume, text_value = True %}
+              placeholder = not latest_resume, text_value = True, accent = 'candy' %}
         {% include "partials/stat_card.html" %}
       {% endwith %}
     </div>
