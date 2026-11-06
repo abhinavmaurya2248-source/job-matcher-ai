@@ -17,11 +17,21 @@ import os
 import sqlite3
 import uuid
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import (
+    Flask,
+    flash,
+    redirect,
+    render_template,
+    request,
+    send_from_directory,
+    session,
+    url_for,
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
 
 import auth
+import csrf
 import db
 import extractor
 from auth import current_user, login_required
@@ -39,6 +49,10 @@ def create_app() -> Flask:
 
     # Create the SQLite database / users table if needed (Milestone 3).
     db.init_app(app)
+
+    # Lightweight CSRF protection for every POST form (login, register,
+    # upload, delete). No extra dependencies are required.
+    csrf.register_csrf_protection(app)
 
     # Make the logged-in user available to every template.
     @app.context_processor
@@ -179,6 +193,14 @@ def register_routes(app: Flask) -> None:
     def index():
         """Landing page."""
         return render_template("index.html")
+
+    @app.route("/favicon.ico")
+    def favicon():
+        """Serve the app favicon so browsers requesting /favicon.ico never
+        hit a 404."""
+        return send_from_directory(
+            app.static_folder, "favicon.ico", mimetype="image/x-icon"
+        )
 
     @app.route("/login", methods=["GET", "POST"])
     def login():

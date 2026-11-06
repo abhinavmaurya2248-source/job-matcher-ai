@@ -2,6 +2,8 @@
 
 {% block title %}Admin Dashboard - AI Resume Analyzer{% endblock %}
 
+{% block head_extra %}<meta name="robots" content="noindex, nofollow" />{% endblock %}
+
 {% block content %}
 {% with heading = 'Admin Dashboard', sub = 'Layout only - all figures below are placeholders, not real system data.' %}
   {% include "partials/page_header.html" %}

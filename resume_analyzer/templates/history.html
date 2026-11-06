@@ -104,6 +104,7 @@
                   <td data-label="Actions" class="text-end">
                     <form class="d-inline" method="post" action="{{ url_for('delete_resume', resume_id=row.id) }}"
                           onsubmit="return confirm('Delete this resume?');">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                       <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                     </form>
                   </td>
