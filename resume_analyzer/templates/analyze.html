@@ -15,6 +15,7 @@
     enctype="multipart/form-data"
     novalidate
   >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
     <div class="row g-4">
       <div class="col-lg-8">
         <div class="card workspace fade-up delay-1">
@@ -85,10 +86,37 @@
           </div>
         </div>
         <div class="card mt-3 fade-up delay-3">
-          <div class="card-header">How the score works</div>
+          <div class="card-header">How the scores work</div>
           <div class="card-body small text-muted-soft">
-            Final score = 50% text similarity (TF-IDF + cosine) + 50% skill match.
-            If the job lists no recognised skills, text similarity is used alone.
+            <p class="fw-semibold text-body mb-1">Job Match Score</p>
+            <p class="mb-2">
+              50% text similarity (TF-IDF + cosine similarity)
+              + 50% skill match &mdash; the share of the job's recognised
+              technical skills that also appear in your resume.
+            </p>
+            <p class="mb-0">
+              If the job description lists no recognised technical skills,
+              skill match cannot be measured, so the text similarity is used
+              as the score on its own.
+            </p>
+            <hr class="my-3" />
+            <p class="fw-semibold text-body mb-1">ATS-style Resume Score</p>
+            <p class="mb-2">
+              40% skill match + 35% keyword relevance (how many of the job's
+              meaningful keywords your resume also uses) + 25% text similarity.
+            </p>
+            <p class="mb-0">
+              When the job description has no recognised technical skills, the
+              skill part is not measurable, so its 40% weight is shared
+              proportionally between the other two parts &mdash; about
+              58.3% keyword relevance + 41.7% text similarity &mdash; keeping
+              their original ratio.
+            </p>
+            <p class="mb-0 mt-2">
+              Both scores are calculated from your actual resume text and the
+              job description you provide. They are estimates for guidance,
+              not the scoring of any real ATS software.
+            </p>
           </div>
         </div>
       </div>
