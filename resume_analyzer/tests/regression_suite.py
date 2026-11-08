@@ -11,6 +11,7 @@ database and uploaded files are never touched, then exercises Milestones
 placeholders) through the Flask test client.
 """
 
+import io
 import os
 import re
 import shutil
@@ -103,13 +104,13 @@ CORRUPT_PDF = b"%PDF-1.4 this is not really a pdf \x00\x01\x02 random bytes"
 BIG_PDF = GOOD_PDF + b"\x00" * (6 * 1024 * 1024)  # over the 5 MB limit
 
 
-def upload(path_name: str, data: bytes, jd: str = "We are hiring a Python developer "
+def upload(path_name: str, jd: str = "We are hiring a Python developer "
            "with Flask, SQL, Git and JavaScript experience for a web application team.") -> object:
     """Upload a PDF as the logged-in user; returns the result page response."""
     return client.post("/upload", data={
         "csrf_token": get_token("/analyze"),
         "job_description": jd,
-        "resume": (open(path_name, "rb").read(), path_name),
+        "resume": (io.BytesIO(open(path_name, "rb").read()), os.path.basename(path_name)),
     }, content_type="multipart/form-data")
 
 
@@ -193,15 +194,15 @@ check("24 upload form carries CSRF token", 'name="csrf_token"' in analyze_html)
 check("25 non-PDF upload rejected",
       b"Only PDF" in client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (b"hello", "resume.txt")}, content_type="multipart/form-data", follow_redirects=True).data)
+          "resume": (io.BytesIO(b"hello"), "resume.txt")}, content_type="multipart/form-data", follow_redirects=True).data)
 check("26 empty submission rejected",
       b"choose a PDF" in client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (b"", "")}, content_type="multipart/form-data", follow_redirects=True).data)
+          "resume": (io.BytesIO(b""), "")}, content_type="multipart/form-data", follow_redirects=True).data)
 check("27 over-5MB upload rejected",
       client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (BIG_PDF, "big.pdf")}, content_type="multipart/form-data").status_code in (302, 413))
+          "resume": (io.BytesIO(BIG_PDF), "big.pdf")}, content_type="multipart/form-data").status_code in (302, 413))
 
 resp = upload(write_tmp("good.pdf", GOOD_PDF))
 check("28 valid PDF upload succeeds", resp.status_code == 200)
