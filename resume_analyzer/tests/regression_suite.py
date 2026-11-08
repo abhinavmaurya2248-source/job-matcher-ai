@@ -273,7 +273,7 @@ with app.app_context():
     a_resume = db_module.find_resume(resumes[0]["id"], 1)
 check("47 user B cannot delete user A's resume",
       b"not found in your account" in client.post(f"/resumes/{a_resume['id']}/delete", data={
-          "csrf_token": get_token("/history")}, follow_redirects=True).data)
+          "csrf_token": get_token("/analyze")}, follow_redirects=True).data)
 
 # Back as user A for the no-skill JD case.
 client.get("/logout")
