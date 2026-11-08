@@ -70,3 +70,15 @@ python -m nltk.downloader stopwords
 If the corpus is missing, the app does **not** crash - it falls back to a
 small built-in English stop-word list. No other NLTK data is required
 (the tokenizer is a regular expression, so `punkt` is not needed).
+
+## Security settings and tests
+
+- **SECRET_KEY**: during local development a built-in key is used automatically.
+  In production, set `APP_ENV=production` and a long random `SECRET_KEY`
+  environment variable; the app refuses to start in production without it.
+- **CSRF protection**: every POST form (login, register, upload, delete) carries
+  a hidden per-session token that is checked on submit.
+- **Admin pages** are layout-only placeholders: they show no user data and
+  perform no actions.
+- **Regression suite**: `python tests/regression_suite.py` (56 checks, runs on
+  an isolated copy, so your database and uploads are untouched).

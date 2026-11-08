@@ -11,6 +11,7 @@ database and uploaded files are never touched, then exercises Milestones
 placeholders) through the Flask test client.
 """
 
+import io
 import os
 import re
 import shutil
@@ -54,7 +55,7 @@ def get_token(path: str) -> str:
 
 
 def register_and_login(email: str, password: str = "secret123", name: str = "Test User") -> None:
-    client.get("/register")
+    client.get("/logout")
     client.post("/register", data={
         "csrf_token": get_token("/register"),
         "name": name, "email": email,
@@ -103,13 +104,13 @@ CORRUPT_PDF = b"%PDF-1.4 this is not really a pdf \x00\x01\x02 random bytes"
 BIG_PDF = GOOD_PDF + b"\x00" * (6 * 1024 * 1024)  # over the 5 MB limit
 
 
-def upload(path_name: str, data: bytes, jd: str = "We are hiring a Python developer "
+def upload(path_name: str, jd: str = "We are hiring a Python developer "
            "with Flask, SQL, Git and JavaScript experience for a web application team.") -> object:
     """Upload a PDF as the logged-in user; returns the result page response."""
     return client.post("/upload", data={
         "csrf_token": get_token("/analyze"),
         "job_description": jd,
-        "resume": (open(path_name, "rb").read(), path_name),
+        "resume": (io.BytesIO(open(path_name, "rb").read()), os.path.basename(path_name)),
     }, content_type="multipart/form-data")
 
 
@@ -191,20 +192,20 @@ check("24 upload form carries CSRF token", 'name="csrf_token"' in analyze_html)
 # 25-31: Milestone 1 upload validation + Milestone 4 persistence
 # ---------------------------------------------------------------------------
 check("25 non-PDF upload rejected",
-      b"Only PDF" in upload("resume.txt", b"not a pdf").data if False else
       b"Only PDF" in client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (b"hello", "resume.txt")}, content_type="multipart/form-data", follow_redirects=True).data)
+          "resume": (io.BytesIO(b"hello"), "resume.txt")}, content_type="multipart/form-data", follow_redirects=True).data)
 check("26 empty submission rejected",
       b"choose a PDF" in client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (b"", "")}, content_type="multipart/form-data", follow_redirects=True).data)
+          "resume": (io.BytesIO(b""), "")}, content_type="multipart/form-data", follow_redirects=True).data)
 check("27 over-5MB upload rejected",
       client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
-          "resume": (BIG_PDF, "big.pdf")}, content_type="multipart/form-data").status_code in (302, 413))
+          "resume": (io.BytesIO(BIG_PDF), "big.pdf")}, content_type="multipart/form-data").status_code in (302, 413))
 
 resp = upload(write_tmp("good.pdf", GOOD_PDF))
+good_result_html = resp.data
 check("28 valid PDF upload succeeds", resp.status_code == 200)
 
 import db as db_module  # noqa: E402
@@ -225,14 +226,13 @@ check("33 image-only PDF gets a clear message", b"No readable text" in resp.data
 resp = upload(write_tmp("corrupt.pdf", CORRUPT_PDF))
 check("34 corrupt PDF gets a clear message", resp.status_code == 200 and b"extract" in resp.data.lower())
 
-check("35 extracted text preview shown on result", b"preview" in resp.data.lower() or b"Extracted text" in resp.data)
+check("35 extracted text preview shown on result", b"Extracted text preview" in good_result_html)
 
 # ---------------------------------------------------------------------------
 # 36-39: Milestone 6 NLP
 # ---------------------------------------------------------------------------
 with app.app_context():
     record = db_module.find_resume(resumes[0]["id"], 1)
-    skills = db_module from_json_list if False else None
 import json as json_module  # noqa: E402
 stored_skills = json_module.loads(record["extracted_skills"] or "[]")
 check("36 technical skills extracted", {"Python", "Flask", "Git"} <= set(stored_skills))
@@ -248,7 +248,7 @@ check("39 resume without skills shows exact message",
 # ---------------------------------------------------------------------------
 with app.app_context():
     analyses = db_module.list_analyses(1)
-    main_analysis = analyses[0]
+    main_analysis = [a for a in analyses if a["original_filename"] == "good.pdf"][0]
 check("40 match score in 0-100 and non-trivial", 0 < main_analysis["match_score"] < 100)
 matched = json_module.loads(main_analysis["matched_skills"])
 missing = json_module.loads(main_analysis["missing_skills"])
@@ -273,7 +273,7 @@ with app.app_context():
     a_resume = db_module.find_resume(resumes[0]["id"], 1)
 check("47 user B cannot delete user A's resume",
       b"not found in your account" in client.post(f"/resumes/{a_resume['id']}/delete", data={
-          "csrf_token": get_token("/history")}, follow_redirects=True).data)
+          "csrf_token": get_token("/analyze")}, follow_redirects=True).data)
 
 # Back as user A for the no-skill JD case.
 client.get("/logout")
@@ -295,8 +295,8 @@ check("50 ATS status band shown", "Match" in result_html and ("Strong Match" in 
 
 from nlp import ats_scorer, matcher  # noqa: E402
 with app.app_context():
-    resume_row = db_module.find_resume(rows[0]["resume_id"], 1)
-    job_text = rows[0]["job_description"]
+    resume_row = db_module.find_resume(main_analysis["resume_id"], 1)
+    job_text = main_analysis["job_description"]
     m = matcher.analyze(resume_row["extracted_text"], job_text)
     ats1 = ats_scorer.calculate(resume_row["extracted_text"], job_text, m)
     ats2 = ats_scorer.calculate(resume_row["extracted_text"], job_text, matcher.analyze(resume_row["extracted_text"], job_text))
@@ -314,8 +314,6 @@ check("52 no-skill JD redistributes ATS weights", no_skill_ats["basis"] == "keyw
 check("53 M7 match_score unaffected by ATS layer", abs(main_analysis["match_score"] - m["match_score"]) < 0.01)
 check("54 keyword counts consistent", no_skill_ats["keyword_matched_count"] <= no_skill_ats["job_keyword_count"])
 
-with sqlite if False else None:
-    pass
 import sqlite3  # noqa: E402
 with sqlite3.connect(os.environ["DATABASE"]) as conn:
     row = conn.execute("SELECT password_hash FROM users WHERE email = 'a@test.com'").fetchone()
