@@ -55,7 +55,7 @@ def get_token(path: str) -> str:
 
 
 def register_and_login(email: str, password: str = "secret123", name: str = "Test User") -> None:
-    client.get("/register")
+    client.get("/logout")
     client.post("/register", data={
         "csrf_token": get_token("/register"),
         "name": name, "email": email,
@@ -205,6 +205,7 @@ check("27 over-5MB upload rejected",
           "resume": (io.BytesIO(BIG_PDF), "big.pdf")}, content_type="multipart/form-data").status_code in (302, 413))
 
 resp = upload(write_tmp("good.pdf", GOOD_PDF))
+good_result_html = resp.data
 check("28 valid PDF upload succeeds", resp.status_code == 200)
 
 import db as db_module  # noqa: E402
@@ -225,7 +226,7 @@ check("33 image-only PDF gets a clear message", b"No readable text" in resp.data
 resp = upload(write_tmp("corrupt.pdf", CORRUPT_PDF))
 check("34 corrupt PDF gets a clear message", resp.status_code == 200 and b"extract" in resp.data.lower())
 
-check("35 extracted text preview shown on result", b"preview" in resp.data.lower() or b"Extracted text" in resp.data)
+check("35 extracted text preview shown on result", b"Extracted text preview" in good_result_html)
 
 # ---------------------------------------------------------------------------
 # 36-39: Milestone 6 NLP
@@ -247,7 +248,7 @@ check("39 resume without skills shows exact message",
 # ---------------------------------------------------------------------------
 with app.app_context():
     analyses = db_module.list_analyses(1)
-    main_analysis = analyses[0]
+    main_analysis = [a for a in analyses if a["original_filename"] == "good.pdf"][0]
 check("40 match score in 0-100 and non-trivial", 0 < main_analysis["match_score"] < 100)
 matched = json_module.loads(main_analysis["matched_skills"])
 missing = json_module.loads(main_analysis["missing_skills"])
@@ -294,8 +295,8 @@ check("50 ATS status band shown", "Match" in result_html and ("Strong Match" in 
 
 from nlp import ats_scorer, matcher  # noqa: E402
 with app.app_context():
-    resume_row = db_module.find_resume(rows[0]["resume_id"], 1)
-    job_text = rows[0]["job_description"]
+    resume_row = db_module.find_resume(main_analysis["resume_id"], 1)
+    job_text = main_analysis["job_description"]
     m = matcher.analyze(resume_row["extracted_text"], job_text)
     ats1 = ats_scorer.calculate(resume_row["extracted_text"], job_text, m)
     ats2 = ats_scorer.calculate(resume_row["extracted_text"], job_text, matcher.analyze(resume_row["extracted_text"], job_text))
