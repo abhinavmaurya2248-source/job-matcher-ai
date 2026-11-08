@@ -191,7 +191,6 @@ check("24 upload form carries CSRF token", 'name="csrf_token"' in analyze_html)
 # 25-31: Milestone 1 upload validation + Milestone 4 persistence
 # ---------------------------------------------------------------------------
 check("25 non-PDF upload rejected",
-      b"Only PDF" in upload("resume.txt", b"not a pdf").data if False else
       b"Only PDF" in client.post("/upload", data={
           "csrf_token": get_token("/analyze"), "job_description": "x",
           "resume": (b"hello", "resume.txt")}, content_type="multipart/form-data", follow_redirects=True).data)
@@ -232,7 +231,6 @@ check("35 extracted text preview shown on result", b"preview" in resp.data.lower
 # ---------------------------------------------------------------------------
 with app.app_context():
     record = db_module.find_resume(resumes[0]["id"], 1)
-    skills = db_module from_json_list if False else None
 import json as json_module  # noqa: E402
 stored_skills = json_module.loads(record["extracted_skills"] or "[]")
 check("36 technical skills extracted", {"Python", "Flask", "Git"} <= set(stored_skills))
@@ -314,8 +312,6 @@ check("52 no-skill JD redistributes ATS weights", no_skill_ats["basis"] == "keyw
 check("53 M7 match_score unaffected by ATS layer", abs(main_analysis["match_score"] - m["match_score"]) < 0.01)
 check("54 keyword counts consistent", no_skill_ats["keyword_matched_count"] <= no_skill_ats["job_keyword_count"])
 
-with sqlite if False else None:
-    pass
 import sqlite3  # noqa: E402
 with sqlite3.connect(os.environ["DATABASE"]) as conn:
     row = conn.execute("SELECT password_hash FROM users WHERE email = 'a@test.com'").fetchone()
